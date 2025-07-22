@@ -1,7 +1,8 @@
 ﻿using ContosoPets.Application.UseCases.Animals;
+using ContosoPets.Domain.Constants;
 using ContosoPets.Infrastructure.Repositories;
 using ContosoPets.Infrastructure.Services;
-using ContosoPets.Domain.Constants;
+using ContosoPets.Presentation.ConsoleApp.Commands;
 
 namespace ContosoPets.Presentation.ConsoleApp
 {
@@ -20,65 +21,29 @@ namespace ContosoPets.Presentation.ConsoleApp
             Console.WriteLine(AppConstants.WelcomeMessage);
 
             bool exit = false;
+            void ExitApp() => exit = true;
+
+            var (orderedMenu, commandMap) = CommandRegistry.BuildCommandRegistry(service, ExitApp);
+
             while (!exit)
             {
-                Console.WriteLine(MenuOptionEnum.MenuListAllAnimals.ToLabel());
-                Console.WriteLine(MenuOptionEnum.MenuAddNewAnimal.ToLabel());
-                Console.WriteLine(MenuOptionEnum.MenuEnsureAgesAndDescriptionsComplete.ToLabel());
-                Console.WriteLine(MenuOptionEnum.MenuEnsureNicknamesAndPersonalityComplete.ToLabel());
-                Console.WriteLine(MenuOptionEnum.MenuEditAnimalAge.ToLabel());
-                Console.WriteLine(MenuOptionEnum.MenuEditAnimalPersonality.ToLabel());
-                Console.WriteLine(MenuOptionEnum.MenuDisplayCatsWithCharacteristic.ToLabel());
-                Console.WriteLine(MenuOptionEnum.MenuDisplayDogsWithCharacteristic.ToLabel());
-                Console.WriteLine(MenuOptionEnum.MenuExit.ToLabel());
+                foreach (var entry in orderedMenu)
+                {
+                    Console.WriteLine(entry.Option.ToLabel());
+                }
 
                 if (int.TryParse(Console.ReadLine(), out int input) && Enum.IsDefined(typeof(MenuOptionEnum), input))
                 {
-                    var menuOption = (MenuOptionEnum)input;
+                    var selected = (MenuOptionEnum)input;
                     Console.WriteLine();
 
-                    switch (menuOption)
+                    if (commandMap.TryGetValue(selected, out var command))
                     {
-                        case MenuOptionEnum.MenuListAllAnimals:
-                            var animals = service.ListAll();
-                            if (animals.Count == 0)
-                            {
-                                Console.WriteLine(AppConstants.NoAnimalsFoundMessage);
-                            }
-                            else
-                            {
-                                foreach (var animal in animals)
-                                {
-                                    animal.DisplayInfo();
-                                    Console.WriteLine();
-                                }
-                            }
-                            break;
-                        case MenuOptionEnum.MenuAddNewAnimal:
-                            service.AddNewAnimal();
-                            break;
-                        case MenuOptionEnum.MenuEnsureAgesAndDescriptionsComplete:
-                            service.EnsureAgesAndDescriptionsComplete();
-                            break;
-                        case MenuOptionEnum.MenuEnsureNicknamesAndPersonalityComplete:
-                            service.EnsureNicknamesAndPersonalityComplete();
-                            break;
-                        case MenuOptionEnum.MenuEditAnimalAge:
-                            service.EditAnimalAge();
-                            break;
-                        case MenuOptionEnum.MenuEditAnimalPersonality:
-                            service.EditAnimalPersonality();
-                            break;
-                        case MenuOptionEnum.MenuDisplayCatsWithCharacteristic:
-                            service.DisplayCatsWithCharacteristic();
-                            break;
-                        case MenuOptionEnum.MenuDisplayDogsWithCharacteristic:
-                            service.DisplayDogsWithCharacteristic();
-                            break;
-                        case MenuOptionEnum.MenuExit:
-                            exit = true;
-                            Console.WriteLine(AppConstants.GoodbyeMessage);
-                            break;
+                        command.Execute();
+                    }
+                    else
+                    {
+                        Console.WriteLine(AppConstants.InvalidOptionMessage);
                     }
                 }
                 else

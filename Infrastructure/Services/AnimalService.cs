@@ -138,14 +138,12 @@ namespace ContosoPets.Infrastructure.Services
             {
                 if (string.IsNullOrEmpty(animal.Nickname) || animal.Nickname == DefaultValue)
                 {
-                    Console.WriteLine(string.Format(AppConstants.NicknamePromptFormat, animal.Id));
                     string newNickname = GetNickname(animal.Id);
                     animal.Nickname = newNickname;
                 }
 
                 if (string.IsNullOrEmpty(animal.PersonalityDescription) || animal.PersonalityDescription == DefaultValue)
                 {
-                    Console.WriteLine(string.Format(AppConstants.PersonalityDescriptionPromptFormat, animal.Id));
                     string newPersonality = GetPersonalityDescription(animal.Id);
                     animal.PersonalityDescription = newPersonality;
                 }
