@@ -1,15 +1,15 @@
 ﻿namespace ContosoPets.Domain.Entities
 {
-    public class Animal
+    public abstract class Animal
     {
-        public string Species { get; set; } = string.Empty;
-        public string Id { get; set; } = string.Empty;
-        public string Age { get; set; } = "?";
-        public string PhysicalDescription { get; set; } = string.Empty;
-        public string PersonalityDescription { get; set; } = string.Empty;
-        public string Nickname { get; set; } = string.Empty;
+        public string Species { get; private set; } = string.Empty;
+        public string Id { get; private set; } = string.Empty;
+        public string Age { get; private set; } = "?";
+        public string PhysicalDescription { get; private set; } = string.Empty;
+        public string PersonalityDescription { get; private set; } = string.Empty;
+        public string Nickname { get; private set; } = string.Empty;
 
-        public Animal() {}
+        protected Animal() {}
 
         public Animal(string species, string id, string age, string physicalDescription, string personalityDescription, string nickname)
         {
@@ -21,7 +21,12 @@
             Nickname = nickname;
         }
 
-        public void DisplayInfo() 
+        public void SetAge(string value) => Age = value;
+        public void SetPhysicalDescription(string value) => PhysicalDescription = value;
+        public void SetPersonalityDescription(string value) => PersonalityDescription = value;
+        public void SetNickname(string value) => Nickname = value;
+
+        public virtual void DisplayInfo() 
         {
             Console.WriteLine($"ID: {Id}");
             Console.WriteLine($"Species: {Species}");

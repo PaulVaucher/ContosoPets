@@ -2,6 +2,7 @@
 using ContosoPets.Domain.Entities;
 using ContosoPets.Application.Ports;
 using ContosoPets.Domain.Constants;
+using ContosoPets.Domain.Builders;
 
 namespace ContosoPets.Infrastructure.Services
 {
@@ -15,14 +16,12 @@ namespace ContosoPets.Infrastructure.Services
 
         public List<Animal> ListAll()
         {
-            return repository.GetAllAnimals()
-                .Where(a => !string.IsNullOrEmpty(a.Id))
-                .ToList();
+            return repository.GetAllAnimals().ToList();
         }
 
         public void AddNewAnimal()
         {
-            var animals = repository.GetAllAnimals();
+            var animals = ListAll();
             int petCount = animals.Count(animal => !string.IsNullOrEmpty(animal.Id));
 
             if (petCount >= MaxPets)
@@ -35,26 +34,36 @@ namespace ContosoPets.Infrastructure.Services
 
             while (anotherPet == CanYes && petCount < MaxPets)
             {
-                string species = GetValidSpecies();
-                string id = Animal.GenerateId(species, petCount + 1);
-                string age = GetValidAge(id);
-                string physicalDescription = GetPhysicalDescription(id);
-                string personalityDescription = GetPersonalityDescription(id);
-                string nickname = GetNickname(id);
-
-
-                var newAnimal = new Animal(species, id, age, physicalDescription, personalityDescription, nickname);
-                repository.AddAnimal(newAnimal);
-                petCount++;
-
-                if (petCount < MaxPets)
+                try
                 {
-                    Console.WriteLine(AppConstants.AddAnotherPetPrompt);
-                    anotherPet = GetYesNoInput();
+                    string species = GetValidSpecies();
+                    string id = Animal.GenerateId(species, petCount + 1);
+
+                    var builder = new AnimalBuilder()
+                        .WithSpecies(species)
+                        .WithId(id)
+                        .WithAge(GetValidAge(id))
+                        .WithPhysicalDescription(GetPhysicalDescription(id))
+                        .WithPersonalityDescription(GetPersonalityDescription(id))
+                        .WithNickname(GetNickname(id));
+
+                    var newAnimal = builder.Build();
+                    repository.AddAnimal(newAnimal);
+                    petCount++;
+
+                    if (petCount < MaxPets)
+                    {
+                        Console.WriteLine(AppConstants.AddAnotherPetPrompt);
+                        anotherPet = GetYesNoInput();
+                    }
+                }
+                catch (InvalidOperationException ex)
+                {
+                    Console.WriteLine($"Erreur : {ex.Message}");
+                    continue;
                 }
             }
-
-            repository.SaveChanges();
+                repository.SaveChanges();
         }
 
         private static string GetValidSpecies()
@@ -95,9 +104,7 @@ namespace ContosoPets.Infrastructure.Services
 
         public void EnsureAgesAndDescriptionsComplete()
         {
-            var animals = repository.GetAllAnimals()
-                .Where(a => !string.IsNullOrEmpty(a.Id))
-                .ToList();
+            var animals = ListAll();
 
             if (animals.Count == 0)
             {
@@ -110,13 +117,13 @@ namespace ContosoPets.Infrastructure.Services
                 {
                     Console.WriteLine(string.Format(AppConstants.AgePromptComplete, animal.Id, animal.Species));
                     string newAge = GetValidAge(animal.Id);
-                    animal.Age = newAge;
+                    animal.SetAge(newAge);
                 }
                 if (string.IsNullOrEmpty(animal.PhysicalDescription) || animal.PhysicalDescription == DefaultValue)
                 {
                     Console.WriteLine(string.Format(AppConstants.PhysicalDescriptioonPromptComplete, animal.Id, animal.Species));
                     string newDescription = GetPhysicalDescription(animal.Id);
-                    animal.PhysicalDescription = newDescription;
+                    animal.SetPhysicalDescription(newDescription);
                 }
             }
             repository.SaveChanges();
@@ -125,9 +132,7 @@ namespace ContosoPets.Infrastructure.Services
 
         public void EnsureNicknamesAndPersonalityComplete()
         {
-            var animals = repository.GetAllAnimals()
-                .Where(a => !string.IsNullOrEmpty(a.Id))
-                .ToList();
+            var animals = ListAll();
 
             if (animals.Count == 0)
             {
@@ -139,13 +144,13 @@ namespace ContosoPets.Infrastructure.Services
                 if (string.IsNullOrEmpty(animal.Nickname) || animal.Nickname == DefaultValue)
                 {
                     string newNickname = GetNickname(animal.Id);
-                    animal.Nickname = newNickname;
+                    animal.SetNickname(newNickname);
                 }
 
                 if (string.IsNullOrEmpty(animal.PersonalityDescription) || animal.PersonalityDescription == DefaultValue)
                 {
                     string newPersonality = GetPersonalityDescription(animal.Id);
-                    animal.PersonalityDescription = newPersonality;
+                    animal.SetPersonalityDescription(newPersonality);
                 }
             }
             Console.WriteLine(AppConstants.NicknamePersonalityCompleteMessage);
@@ -156,13 +161,13 @@ namespace ContosoPets.Infrastructure.Services
         {
             Console.WriteLine(string.Format(AppConstants.EnterAnimalIdPrompt, "age"));
             string? id = Console.ReadLine();
-            var animals = repository.GetAllAnimals();
+            var animals = ListAll();
             var animal = animals.FirstOrDefault(a => a.Id == id);
             if (animal != null)
             {
                 Console.WriteLine(string.Format(AppConstants.CurrentAgeFormat, id, animal.Age));
                 string newAge = GetValidAge(animal.Id);
-                animal.Age = newAge;
+                animal.SetAge(newAge);
                 Console.WriteLine(string.Format(AppConstants.UpdatedAgeFormat, id, newAge));
             }
             else
@@ -175,13 +180,13 @@ namespace ContosoPets.Infrastructure.Services
         {
             Console.WriteLine(string.Format(AppConstants.EnterAnimalIdPrompt, "personality"));
             string? id = Console.ReadLine();
-            var animals = repository.GetAllAnimals();
+            var animals = ListAll();
             var animal = animals.FirstOrDefault(a => a.Id == id);
             if (animal != null)
             {
                 Console.WriteLine(string.Format(AppConstants.CurrentPersonalityFormat, id, animal.PersonalityDescription));
                 string newPersonality = GetPersonalityDescription(animal.Id);
-                animal.PersonalityDescription = newPersonality;
+                animal.SetAge(newPersonality);
                 Console.WriteLine(AppConstants.UpdatedPersonalityMessage);
             }
             else
@@ -197,7 +202,7 @@ namespace ContosoPets.Infrastructure.Services
 
             if (!string.IsNullOrEmpty(characteristic))
             {
-                var animals = repository.GetAllAnimals()
+                var animals = ListAll()
                     .Where(a => a.Species.Equals(species, StringComparison.OrdinalIgnoreCase) &&
                         !string.IsNullOrEmpty(a.Id) &&
                         (a.PhysicalDescription.Contains(characteristic, StringComparison.OrdinalIgnoreCase) ||
