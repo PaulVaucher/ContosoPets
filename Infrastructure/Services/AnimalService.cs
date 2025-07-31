@@ -39,7 +39,7 @@ namespace ContosoPets.Infrastructure.Services
                     string species = GetValidSpecies();
                     string id = Animal.GenerateId(species, petCount + 1);
 
-                    var builder = new AnimalBuilder()
+                    var builder = AnimalBuilder.Create()
                         .WithSpecies(species)
                         .WithId(id)
                         .WithAge(GetValidAge(id))
@@ -60,7 +60,6 @@ namespace ContosoPets.Infrastructure.Services
                 catch (InvalidOperationException ex)
                 {
                     Console.WriteLine($"Erreur : {ex.Message}");
-                    continue;
                 }
             }
                 repository.SaveChanges();

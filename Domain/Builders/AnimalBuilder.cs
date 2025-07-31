@@ -5,12 +5,35 @@ namespace ContosoPets.Domain.Builders
 {
     public class AnimalBuilder
     {
+        private static readonly AnimalBuilder Instance = new();
+
         private string _species = string.Empty;
         private string _id = string.Empty;
         private string _age = "?";
         private string _physicalDescription = "tbd";
         private string _personalityDescription = "tbd";
         private string _nickname = "tbd";
+
+        private AnimalBuilder()
+        {
+            Reset();
+        }
+
+        public static AnimalBuilder Create()
+        {
+            Instance.Reset();
+            return Instance;
+        }
+
+        private void Reset()
+        {
+            _species = string.Empty;
+            _id = string.Empty;
+            _age = "?";
+            _physicalDescription = "tbd";
+            _personalityDescription = "tbd";
+            _nickname = "tbd";
+        }
 
         public AnimalBuilder WithSpecies(string species)
         {
@@ -55,12 +78,15 @@ namespace ContosoPets.Domain.Builders
             if (string.IsNullOrEmpty(_id))
                 throw new InvalidOperationException("ID must be specified."); // id générée automatiquement donc pas indispensable
 
-            return _species switch
+            Animal result = _species switch
             {
                 "dog" => new Dog(_id, _age, _physicalDescription, _personalityDescription, _nickname),
                 "cat" => new Cat(_id, _age, _physicalDescription, _personalityDescription, _nickname),
                 _ => throw new InvalidOperationException(AppConstants.InvalidSpeciesMessage)
             };
+
+            Reset();
+            return result;
         }
     }
 }
