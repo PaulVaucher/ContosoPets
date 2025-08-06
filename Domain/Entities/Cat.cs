@@ -2,7 +2,9 @@
 {
     public class Cat : Animal
     {
-        protected Cat() : base() { }
+        public Cat() : base() { }
+
+        [System.Text.Json.Serialization.JsonConstructor]
         public Cat(string id, string age, string physicalDescription, string personalityDescription, string nickname)
             : base("cat", id, age, physicalDescription, personalityDescription, nickname)
         {

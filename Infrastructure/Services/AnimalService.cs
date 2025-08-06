@@ -39,7 +39,7 @@ namespace ContosoPets.Infrastructure.Services
                     string species = GetValidSpecies();
                     string id = Animal.GenerateId(species, petCount + 1);
 
-                    var builder = AnimalBuilder.Create()
+                    var builder = AnimalBuilder.Builder()
                         .WithSpecies(species)
                         .WithId(id)
                         .WithAge(GetValidAge(id))

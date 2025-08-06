@@ -9,8 +9,9 @@
         public string PersonalityDescription { get; private set; } = string.Empty;
         public string Nickname { get; private set; } = string.Empty;
 
-        protected Animal() {}
+        public Animal() {}
 
+        [System.Text.Json.Serialization.JsonConstructor]
         public Animal(string species, string id, string age, string physicalDescription, string personalityDescription, string nickname)
         {
             Species = species;

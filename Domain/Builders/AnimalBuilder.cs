@@ -5,8 +5,6 @@ namespace ContosoPets.Domain.Builders
 {
     public class AnimalBuilder
     {
-        private static readonly AnimalBuilder Instance = new();
-
         private string _species = string.Empty;
         private string _id = string.Empty;
         private string _age = "?";
@@ -19,10 +17,9 @@ namespace ContosoPets.Domain.Builders
             Reset();
         }
 
-        public static AnimalBuilder Create()
+        public static AnimalBuilder Builder()
         {
-            Instance.Reset();
-            return Instance;
+          return new AnimalBuilder();
         }
 
         private void Reset()

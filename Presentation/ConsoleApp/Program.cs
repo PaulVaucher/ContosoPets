@@ -18,6 +18,7 @@ namespace ContosoPets.Presentation.ConsoleApp
             var repository = new AnimalRepository();
             IAnimalService service = new AnimalService(repository);
 
+            
             Console.WriteLine(AppConstants.WelcomeMessage);
 
             bool exit = false;

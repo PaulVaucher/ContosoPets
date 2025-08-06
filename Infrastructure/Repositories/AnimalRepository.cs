@@ -52,8 +52,13 @@ namespace ContosoPets.Infrastructure.Repositories
 
         public void SaveChanges()
         {
-            var json = JsonSerializer.Serialize(_animals, SerializerOptions);
-            File.WriteAllText(DataFile, json);
+            var directory = Path.GetDirectoryName(DataFile);
+            if (!Directory.Exists(directory))
+                Directory.CreateDirectory(directory);
+
+            using var fs = new FileStream(DataFile, FileMode.Create, FileAccess.Write);
+            using var writer = new Utf8JsonWriter(fs, new JsonWriterOptions { Indented = true });
+            JsonSerializer.Serialize(writer, _animals, SerializerOptions);
         }
     }
 
