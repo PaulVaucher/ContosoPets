@@ -5,8 +5,8 @@
         public Cat() : base() { }
 
         [System.Text.Json.Serialization.JsonConstructor]
-        public Cat(string id, string age, string physicalDescription, string personalityDescription, string nickname)
-            : base("cat", id, age, physicalDescription, personalityDescription, nickname)
+        public Cat(string species, string id, string age, string physicalDescription, string personalityDescription, string nickname)
+            : base(species, id, age, physicalDescription, personalityDescription, nickname)
         {
         }
     }

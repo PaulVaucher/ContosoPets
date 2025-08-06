@@ -77,8 +77,8 @@ namespace ContosoPets.Domain.Builders
 
             Animal result = _species switch
             {
-                "dog" => new Dog(_id, _age, _physicalDescription, _personalityDescription, _nickname),
-                "cat" => new Cat(_id, _age, _physicalDescription, _personalityDescription, _nickname),
+                "dog" => new Dog("dog",_id, _age, _physicalDescription, _personalityDescription, _nickname),
+                "cat" => new Cat("cat",_id, _age, _physicalDescription, _personalityDescription, _nickname),
                 _ => throw new InvalidOperationException(AppConstants.InvalidSpeciesMessage)
             };
 

@@ -51,6 +51,8 @@ namespace ContosoPets.Infrastructure.Services
                     repository.AddAnimal(newAnimal);
                     petCount++;
 
+                    repository.SaveChanges();
+
                     if (petCount < MaxPets)
                     {
                         Console.WriteLine(AppConstants.AddAnotherPetPrompt);
@@ -61,8 +63,7 @@ namespace ContosoPets.Infrastructure.Services
                 {
                     Console.WriteLine($"Erreur : {ex.Message}");
                 }
-            }
-                repository.SaveChanges();
+            }                
         }
 
         private static string GetValidSpecies()
@@ -110,22 +111,28 @@ namespace ContosoPets.Infrastructure.Services
                 Console.WriteLine(AppConstants.NoAnimalsFoundMessage);
             }
 
-                foreach (var animal in animals)
+            bool hasChanges = false;
+            foreach (var animal in animals)
             {
                 if (string.IsNullOrEmpty(animal.Age) || animal.Age == UnknownAge)
                 {
                     Console.WriteLine(string.Format(AppConstants.AgePromptComplete, animal.Id, animal.Species));
                     string newAge = GetValidAge(animal.Id);
                     animal.SetAge(newAge);
+                    hasChanges = true;
                 }
                 if (string.IsNullOrEmpty(animal.PhysicalDescription) || animal.PhysicalDescription == DefaultValue)
                 {
                     Console.WriteLine(string.Format(AppConstants.PhysicalDescriptioonPromptComplete, animal.Id, animal.Species));
                     string newDescription = GetPhysicalDescription(animal.Id);
                     animal.SetPhysicalDescription(newDescription);
+                    hasChanges = true;
                 }
             }
-            repository.SaveChanges();
+            if (hasChanges)
+            {
+                repository.SaveChanges();
+            }
             Console.WriteLine(AppConstants.AgeAndDescriptionCompleteMessage);
         }
 
@@ -138,22 +145,28 @@ namespace ContosoPets.Infrastructure.Services
                 Console.WriteLine(AppConstants.NoAnimalsFoundMessage);
             }
 
+            bool hasChanges = false;
             foreach (var animal in animals.Where(a => !string.IsNullOrEmpty(a.Id)))
             {
                 if (string.IsNullOrEmpty(animal.Nickname) || animal.Nickname == DefaultValue)
                 {
                     string newNickname = GetNickname(animal.Id);
                     animal.SetNickname(newNickname);
+                    hasChanges = true;
                 }
 
                 if (string.IsNullOrEmpty(animal.PersonalityDescription) || animal.PersonalityDescription == DefaultValue)
                 {
                     string newPersonality = GetPersonalityDescription(animal.Id);
                     animal.SetPersonalityDescription(newPersonality);
+                        
                 }
             }
+            if (hasChanges)
+            {
+                repository.SaveChanges();
+            }
             Console.WriteLine(AppConstants.NicknamePersonalityCompleteMessage);
-            repository.SaveChanges();
         }
 
         public void EditAnimalAge()
@@ -167,6 +180,7 @@ namespace ContosoPets.Infrastructure.Services
                 Console.WriteLine(string.Format(AppConstants.CurrentAgeFormat, id, animal.Age));
                 string newAge = GetValidAge(animal.Id);
                 animal.SetAge(newAge);
+                repository.SaveChanges();
                 Console.WriteLine(string.Format(AppConstants.UpdatedAgeFormat, id, newAge));
             }
             else
@@ -185,7 +199,8 @@ namespace ContosoPets.Infrastructure.Services
             {
                 Console.WriteLine(string.Format(AppConstants.CurrentPersonalityFormat, id, animal.PersonalityDescription));
                 string newPersonality = GetPersonalityDescription(animal.Id);
-                animal.SetAge(newPersonality);
+                animal.SetPersonalityDescription(newPersonality);
+                repository.SaveChanges();
                 Console.WriteLine(AppConstants.UpdatedPersonalityMessage);
             }
             else

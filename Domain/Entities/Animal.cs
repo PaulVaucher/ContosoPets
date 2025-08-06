@@ -10,8 +10,7 @@
         public string Nickname { get; private set; } = string.Empty;
 
         public Animal() {}
-
-        [System.Text.Json.Serialization.JsonConstructor]
+        
         public Animal(string species, string id, string age, string physicalDescription, string personalityDescription, string nickname)
         {
             Species = species;

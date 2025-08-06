@@ -2,7 +2,6 @@
 using ContosoPets.Domain.Entities;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Text.Json.Serialization.Metadata;
 
 namespace ContosoPets.Infrastructure.Repositories
 {
@@ -13,8 +12,10 @@ namespace ContosoPets.Infrastructure.Repositories
         private static JsonSerializerOptions SerializerOptions => new()
         {
             WriteIndented = true,
-            Converters = { new JsonStringEnumConverter() },
-            TypeInfoResolver = new AnimalTypeResolver(),
+            Converters = { 
+                new JsonStringEnumConverter(),
+                new AnimalJsonConverter()
+            },
             PropertyNameCaseInsensitive = true,
         };
 
@@ -29,7 +30,7 @@ namespace ContosoPets.Infrastructure.Repositories
                     var deserialized = JsonSerializer.Deserialize<List<Animal>>(json, SerializerOptions);
                     _animals = deserialized ?? new List<Animal>();
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                     _animals = new List<Animal>();
                 }
@@ -52,38 +53,20 @@ namespace ContosoPets.Infrastructure.Repositories
 
         public void SaveChanges()
         {
-            var directory = Path.GetDirectoryName(DataFile);
-            if (!Directory.Exists(directory))
-                Directory.CreateDirectory(directory);
-
-            using var fs = new FileStream(DataFile, FileMode.Create, FileAccess.Write);
-            using var writer = new Utf8JsonWriter(fs, new JsonWriterOptions { Indented = true });
-            JsonSerializer.Serialize(writer, _animals, SerializerOptions);
-        }
-    }
-
-    public class AnimalTypeResolver : DefaultJsonTypeInfoResolver
-    {
-        public override JsonTypeInfo GetTypeInfo(Type type, JsonSerializerOptions options)
-        {
-            JsonTypeInfo jsonTypeInfo = base.GetTypeInfo(type, options);
-
-            if (type == typeof(Animal))
+            try
             {
-                jsonTypeInfo.PolymorphismOptions = new JsonPolymorphismOptions
-                {
-                    TypeDiscriminatorPropertyName = "Species",
-                    IgnoreUnrecognizedTypeDiscriminators = true,
-                    UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FallBackToBaseType,
-                    DerivedTypes =
-                    {
-                        new JsonDerivedType(typeof(Dog), "dog"),
-                        new JsonDerivedType(typeof(Cat), "cat"),
-                    }
-                };
-            }
-            return jsonTypeInfo;
+                var directory = Path.GetDirectoryName(DataFile);
+                if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+                    Directory.CreateDirectory(directory);
 
+                using var fs = new FileStream(DataFile, FileMode.Create, FileAccess.Write);
+                using var writer = new Utf8JsonWriter(fs, new JsonWriterOptions { Indented = true });
+                JsonSerializer.Serialize(writer, _animals, SerializerOptions);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Save error: {ex.Message}");
+            }
         }
     }
 }
