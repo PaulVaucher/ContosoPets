@@ -21,10 +21,24 @@
             Nickname = nickname;
         }
 
-        public void SetAge(string value) => Age = value;
-        public void SetPhysicalDescription(string value) => PhysicalDescription = value;
-        public void SetPersonalityDescription(string value) => PersonalityDescription = value;
-        public void SetNickname(string value) => Nickname = value;
+        public void SetAge(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                throw new ArgumentException("Age cannot be null or whitespace", nameof(value));
+            Age = value;
+        }
+        public void SetPhysicalDescription(string value)
+        {
+            PhysicalDescription = value ?? throw new ArgumentNullException(nameof(value));
+        }
+        public void SetPersonalityDescription(string value)
+        {
+            PersonalityDescription = value ?? throw new ArgumentNullException(nameof(value));
+        }
+        public void SetNickname(string value)
+        {
+            Nickname = value ?? throw new ArgumentNullException(nameof(value));
+        }
 
         public virtual void DisplayInfo() 
         {

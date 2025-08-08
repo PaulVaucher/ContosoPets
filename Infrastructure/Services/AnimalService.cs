@@ -123,7 +123,7 @@ namespace ContosoPets.Infrastructure.Services
                 }
                 if (string.IsNullOrEmpty(animal.PhysicalDescription) || animal.PhysicalDescription == DefaultValue)
                 {
-                    Console.WriteLine(string.Format(AppConstants.PhysicalDescriptioonPromptComplete, animal.Id, animal.Species));
+                    Console.WriteLine(string.Format(AppConstants.PhysicalDescriptionPromptComplete, animal.Id, animal.Species));
                     string newDescription = GetPhysicalDescription(animal.Id);
                     animal.SetPhysicalDescription(newDescription);
                     hasChanges = true;
@@ -186,7 +186,7 @@ namespace ContosoPets.Infrastructure.Services
             }
             else
             {
-                Console.WriteLine(AppConstants.NoAnimalsFoundMessage);
+                Console.WriteLine(AppConstants.AnimalNotFoundMessage);
             }
         }
 
@@ -206,7 +206,7 @@ namespace ContosoPets.Infrastructure.Services
             }
             else
             {
-                Console.WriteLine(AppConstants.NoAnimalsFoundMessage);
+                Console.WriteLine(AppConstants.AnimalNotFoundMessage);
             }
         }
 
