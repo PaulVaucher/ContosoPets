@@ -15,7 +15,7 @@
         public const string AgePromptFormat = "Enter an age for the animal {0} or '?' if unknown";
         public const string AgePromptComplete = "Please enter an age for {0} ({1})";
         public const string PhysicalDescriptionPromptFormat = "Enter a physical description for the animal {0} (size, color, breed, gender, weight, housebroken)";
-        public const string PhysicalDescriptioonPromptComplete = "Please enter a physical description for {0} ({1})";
+        public const string PhysicalDescriptionPromptComplete = "Please enter a physical description for {0} ({1})";
         public const string PersonalityDescriptionPromptFormat = "Enter a personality description for the animal {0} (likes or dislikes, tricks, energy level)";
         public const string NicknamePromptFormat = "Enter a nickname for the animal {0} or tbd if unknown";
         public const string EnterAnimalIdPrompt = "Enter the ID of the animal whose {0} you want to edit:";

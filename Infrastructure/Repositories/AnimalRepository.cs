@@ -24,13 +24,12 @@ namespace ContosoPets.Infrastructure.Repositories
             if (File.Exists(DataFile))
             {
                 string json = File.ReadAllText(DataFile);
-
                 try
                 {
                     var deserialized = JsonSerializer.Deserialize<List<Animal>>(json, SerializerOptions);
                     _animals = deserialized ?? new List<Animal>();
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     _animals = new List<Animal>();
                 }

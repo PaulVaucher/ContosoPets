@@ -1,20 +1,36 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <Folder Include="Resources\" />
-  </ItemGroup>
+	<ItemGroup>
+		<Folder Include="Resources\" />
+		<Folder Include="Scripts\build\" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <None Update="Resources\animals.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+	<ItemGroup>
+		<None Update="Resources\animals.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="Scripts\build\post-build-cleanup.ps1" />
+	</ItemGroup>
+
+	<!-- Configuration du script post-build -->
+	<Target Name="PostBuildCleanup" AfterTargets="Build">
+		<Message Text="Post-build cleanup running..." Importance="high" />
+
+		<Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\Scripts\build\post-build-cleanup.ps1&quot; -OutputPath &quot;$(OutputPath)&quot;"
+			  ContinueOnError="true" />
+	</Target>
+
+	<!-- Target pour nettoyage profond (manuel) -->
+	<Target Name="DeepClean">
+		<Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\Scripts\build\post-build-cleanup.ps1&quot; -OutputPath &quot;$(OutputPath)&quot; -DeepClean"
+			  ContinueOnError="true" />
+	</Target>
 
 </Project>

@@ -159,6 +159,7 @@ namespace ContosoPets.Infrastructure.Services
                 {
                     string newPersonality = GetPersonalityDescription(animal.Id);
                     animal.SetPersonalityDescription(newPersonality);
+                    hasChanges = true;
                         
                 }
             }
