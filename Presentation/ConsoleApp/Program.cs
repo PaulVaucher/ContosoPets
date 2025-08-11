@@ -1,8 +1,9 @@
-﻿using ContosoPets.Application.UseCases.Animals;
+﻿using Contosopets.Bootstrap;
+using ContosoPets.Application.UseCases.Animals;
 using ContosoPets.Domain.Constants;
-using ContosoPets.Infrastructure.Repositories;
-using ContosoPets.Infrastructure.Services;
+using ContosoPets.Infrastructure.AssemblyReferences;
 using ContosoPets.Presentation.ConsoleApp.Commands;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ContosoPets.Presentation.ConsoleApp
 {
@@ -10,14 +11,17 @@ namespace ContosoPets.Presentation.ConsoleApp
     {
         static void Main(string[] args)
         {
-            RunApplication();
+            IServiceCollection services = new ServiceCollection();                // 1. Créer la collection
+            services.AddInjectablesFromAssembly(typeof(IAssemblyReference).Assembly); // 2. Enregistrer
+
+            var serviceProvider = services.BuildServiceProvider(); // 3. Construire le conteneur
+
+            var service = serviceProvider.GetRequiredService<IAnimalService>(); // 4. Résoudre une instance
+            RunApplication(service);
         }
 
-        private static void RunApplication()
+        private static void RunApplication(IAnimalService service)
         {
-            var repository = new AnimalRepository();
-            IAnimalService service = new AnimalService(repository);
-
             
             Console.WriteLine(AppConstants.WelcomeMessage);
 
