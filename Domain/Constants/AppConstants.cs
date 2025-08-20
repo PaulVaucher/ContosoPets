@@ -37,6 +37,16 @@
 
         // Search results
         public const string CharacteristicResultsFormat = "{0}s with characteristic '{1}':";
-        public const string NoCharacteristicMatchFormat = "No {0}s found with characteristic '{1}'.";    
+        public const string NoCharacteristicMatchFormat = "No {0}s found with characteristic '{1}'.";
+
+        // Error messages
+        public const string ApplicationStartupErrorFormat = "Application startup error: {0}";
+        public const string ServiceConfigurationErrorFormat = "Service configuration error: {0}";
+        public const string UnexpectedErrorFormat = "Unexpected error: {0}";
+        public const string MenuExecutionErrorFormat = "Menu execution error: {0}";
+        public const string AnimalOperationErrorFormat = "Animal operation error: {0}";
+        public const string ContinuePrompt = "Press any key to continue...";
+        public const string ApplicationExitingMessage = "Application is closing due to a critical error.";
+        public const string MenuPrompt = "Your choice: ";
     }
 }

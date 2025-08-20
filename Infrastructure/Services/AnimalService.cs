@@ -61,7 +61,7 @@ namespace ContosoPets.Infrastructure.Services
                 }
                 catch (InvalidOperationException ex)
                 {
-                    Console.WriteLine($"Erreur : {ex.Message}");
+                    Console.WriteLine(string.Format(AppConstants.AnimalOperationErrorFormat, ex.Message));
                 }
             }                
         }

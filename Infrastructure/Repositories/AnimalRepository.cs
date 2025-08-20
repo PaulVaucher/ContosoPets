@@ -1,4 +1,5 @@
 ﻿using ContosoPets.Application.Ports;
+using ContosoPets.Domain.Constants;
 using ContosoPets.Domain.Entities;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -64,7 +65,7 @@ namespace ContosoPets.Infrastructure.Repositories
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Save error: {ex.Message}");
+                Console.WriteLine(string.Format(AppConstants.AnimalOperationErrorFormat, ex.Message));
             }
         }
     }

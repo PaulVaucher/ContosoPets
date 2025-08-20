@@ -1,5 +1,4 @@
-﻿using Contosopets.Bootstrap;
-using ContosoPets.Domain.Entities;
+﻿using ContosoPets.Domain.Entities;
 using ContosoPets.Infrastructure.AssemblyReferences;
 
 namespace ContosoPets.Application.UseCases.Animals

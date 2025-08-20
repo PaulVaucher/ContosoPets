@@ -1,7 +1,6 @@
-﻿using Contosopets.Bootstrap;
-using ContosoPets.Application.UseCases.Animals;
+﻿using ContosoPets.Application.UseCases.Animals;
 using ContosoPets.Domain.Constants;
-using ContosoPets.Infrastructure.AssemblyReferences;
+using ContosoPets.Infrastructure.DI;
 using ContosoPets.Presentation.ConsoleApp.Commands;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -11,18 +10,58 @@ namespace ContosoPets.Presentation.ConsoleApp
     {
         static void Main(string[] args)
         {
-            IServiceCollection services = new ServiceCollection();                // 1. Créer la collection
-            services.AddInjectablesFromAssembly(typeof(IAssemblyReference).Assembly); // 2. Enregistrer
-
-            var serviceProvider = services.BuildServiceProvider(); // 3. Construire le conteneur
-
-            var service = serviceProvider.GetRequiredService<IAnimalService>(); // 4. Résoudre une instance
-            RunApplication(service);
+            try
+            {
+                var serviceProvider = ConfigureServices();
+                using (serviceProvider)
+                {
+                    RunApplication(serviceProvider);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(string.Format(AppConstants.ApplicationStartupErrorFormat, ex.Message));
+                Console.WriteLine(AppConstants.ApplicationExitingMessage);
+                Environment.ExitCode = 1;
+            }
         }
 
-        private static void RunApplication(IAnimalService service)
+        private static ServiceProvider ConfigureServices()
         {
-            
+            try
+            {
+                var services = new ServiceCollection();
+                services.AddInfrastructure();
+                return services.BuildServiceProvider();
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException(
+                    string.Format(AppConstants.ServiceConfigurationErrorFormat, ex.Message), ex);
+            }
+        }
+
+        private static void RunApplication(ServiceProvider serviceProvider)
+        {
+            try
+            {
+                var animalService = serviceProvider.GetRequiredService<IAnimalService>();
+                RunInteractiveMenu(animalService);
+            }
+            catch (InvalidOperationException ex)
+            {
+                Console.WriteLine(string.Format(AppConstants.ServiceConfigurationErrorFormat, ex.Message));
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(string.Format(AppConstants.UnexpectedErrorFormat, ex.Message));
+                throw;
+            }
+        }
+
+        private static void RunInteractiveMenu(IAnimalService service)
+        {
             Console.WriteLine(AppConstants.WelcomeMessage);
 
             bool exit = false;
@@ -32,29 +71,67 @@ namespace ContosoPets.Presentation.ConsoleApp
 
             while (!exit)
             {
-                foreach (var entry in orderedMenu)
+                try
                 {
-                    Console.WriteLine(entry.Option.ToLabel());
+                    DisplayMenu(orderedMenu);
+                    ProcessUserInput(commandMap);
                 }
-
-                if (int.TryParse(Console.ReadLine(), out int input) && Enum.IsDefined(typeof(MenuOptionEnum), input))
+                catch (Exception ex)
                 {
-                    var selected = (MenuOptionEnum)input;
-                    Console.WriteLine();
+                    Console.WriteLine(string.Format(AppConstants.MenuExecutionErrorFormat, ex.Message));
+                    Console.WriteLine(AppConstants.ContinuePrompt);
+                    Console.ReadKey();
+                    Console.Clear();
+                }
+            }
+        }
 
-                    if (commandMap.TryGetValue(selected, out var command))
-                    {
-                        command.Execute();
-                    }
-                    else
-                    {
-                        Console.WriteLine(AppConstants.InvalidOptionMessage);
-                    }
+        private static void DisplayMenu(List<MenuCommandEntry> orderedMenu)
+        {
+            Console.WriteLine();
+            foreach (var entry in orderedMenu)
+            {
+                Console.WriteLine(entry.Option.ToLabel());
+            }
+            Console.Write(AppConstants.MenuPrompt);
+        }
+
+        private static void ProcessUserInput(Dictionary<MenuOptionEnum, IMenuCommand> commandMap)
+        {
+            var input = Console.ReadLine();
+
+            if (int.TryParse(input, out int menuChoice) &&
+                Enum.IsDefined(typeof(MenuOptionEnum), menuChoice))
+            {
+                var selected = (MenuOptionEnum)menuChoice;
+                Console.WriteLine();
+
+                if (commandMap.TryGetValue(selected, out var command))
+                {
+                    ExecuteCommand(command);
                 }
                 else
                 {
                     Console.WriteLine(AppConstants.InvalidOptionMessage);
                 }
+            }
+            else
+            {
+                Console.WriteLine(AppConstants.InvalidOptionMessage);
+            }
+        }
+
+        private static void ExecuteCommand(IMenuCommand command)
+        {
+            try
+            {
+                command.Execute();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(string.Format(AppConstants.MenuExecutionErrorFormat, ex.Message));
+                Console.WriteLine(AppConstants.ContinuePrompt);
+                Console.ReadKey();
             }
         }
     }

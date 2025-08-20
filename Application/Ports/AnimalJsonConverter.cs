@@ -8,9 +8,8 @@ namespace ContosoPets.Application.Ports
     {
         public override Animal? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            using (JsonDocument doc = JsonDocument.ParseValue(ref reader))
-            {
-                var root = doc.RootElement;
+            using JsonDocument doc = JsonDocument.ParseValue(ref reader);
+            var root = doc.RootElement;
 
                 // Lire la propriété Species pour déterminer le type
                 if (root.TryGetProperty("Species", out var speciesProperty))
@@ -39,7 +38,7 @@ namespace ContosoPets.Application.Ports
                 }
 
                 throw new JsonException("Species property not found");
-            }
+            
         }
 
         public override void Write(Utf8JsonWriter writer, Animal value, JsonSerializerOptions options)
