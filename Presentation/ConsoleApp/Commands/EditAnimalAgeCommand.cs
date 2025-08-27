@@ -1,4 +1,5 @@
 ﻿using ContosoPets.Application.UseCases.Animals;
+using ContosoPets.Domain.Constants;
 
 namespace ContosoPets.Presentation.ConsoleApp.Commands
 {
@@ -13,7 +14,24 @@ namespace ContosoPets.Presentation.ConsoleApp.Commands
 
         public void Execute()
         {
-            _service.EditAnimalAge();
+            Console.WriteLine(AppConstants.EnterAnimalIdPrompt, "age");
+            var id = Console.ReadLine() ?? string.Empty;
+            var animal = _service.GetAnimalById(id);
+
+            if (animal == null)
+            {
+                Console.WriteLine(AppConstants.AnimalNotFoundMessage);
+                return;
+            }
+
+            Console.WriteLine(string.Format(AppConstants.CurrentAgeFormat, id, animal.Age));
+            Console.WriteLine(string.Format(AppConstants.AgePromptFormat, id));
+            var newAge = Console.ReadLine() ?? string.Empty;
+
+            if (_service.UpdateAnimalAge(id, newAge))
+                Console.WriteLine(string.Format(AppConstants.UpdatedAgeFormat, id, newAge));
+            else
+                Console.WriteLine(AppConstants.AnimalNotFoundMessage);
         }
     }
 }
