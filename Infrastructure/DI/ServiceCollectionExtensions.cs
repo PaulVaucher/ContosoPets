@@ -1,5 +1,9 @@
 ﻿using ContosoPets.Infrastructure.AssemblyReferences;
+using ContosoPets.Infrastructure.Configuration;
+using ContosoPets.Infrastructure.Database;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using NHibernate;
 using System.Reflection;
 
 namespace ContosoPets.Infrastructure.DI
@@ -7,16 +11,26 @@ namespace ContosoPets.Infrastructure.DI
     public static class ServiceCollectionExtensions
     {
         /// <summary>
-        /// Configure tous les services de l'infrastructure
+        /// Configure all infrastructure services
         /// </summary>
-        public static IServiceCollection AddInfrastructure(this IServiceCollection services)
+        public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
+            services.AddLogging();
+
+            services.AddSingleton<ISessionFactory>(provider =>
+            {
+                var nhConfig = new NHibernateConfiguration(configuration);
+                return nhConfig.CreateSessionFactory();
+            });
+
+            services.AddSingleton<DatabaseInitializer>();
             services.AddInjectablesFromAssembly(typeof(IAssemblyReference).Assembly);
+            
             return services;
         }
 
         /// <summary>
-        /// Scan l'assembly donné et enregistre automatiquement tous les services
+        /// Scan the given assembly and automatically register all services
         /// </summary>
         public static IServiceCollection AddInjectablesFromAssembly(this IServiceCollection services, Assembly assembly)
         {

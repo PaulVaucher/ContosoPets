@@ -7,6 +7,9 @@ namespace ContosoPets.Application.Ports
     {
         List<Animal> GetAllAnimals();
         void AddAnimal(Animal animal);
-        void SaveChanges();
+        Animal? GetById(string id);
+        void UpdateAnimal(Animal animal);
+        void DeleteAnimal(Animal animal);
+        void SaveChanges(); // for compatibility with interface
     }
 }

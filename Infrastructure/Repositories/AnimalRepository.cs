@@ -1,72 +1,144 @@
 ﻿using ContosoPets.Application.Ports;
-using ContosoPets.Domain.Constants;
 using ContosoPets.Domain.Entities;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+using ContosoPets.Infrastructure.Entities;
+using NHibernate;
 
 namespace ContosoPets.Infrastructure.Repositories
 {
     public class AnimalRepository : IAnimalRepository
     {
-        private readonly List<Animal> _animals;
-        private static string DataFile => Path.Combine(AppContext.BaseDirectory, "Resources", "animals.json");
-        private static JsonSerializerOptions SerializerOptions => new()
-        {
-            WriteIndented = true,
-            Converters = { 
-                new JsonStringEnumConverter(),
-                new AnimalJsonConverter()
-            },
-            PropertyNameCaseInsensitive = true,
-        };
+        private readonly ISessionFactory _sessionFactory;
 
-        public AnimalRepository()
+        public AnimalRepository(ISessionFactory sessionFactory)
         {
-            if (File.Exists(DataFile))
-            {
-                string json = File.ReadAllText(DataFile);
-                try
-                {
-                    var deserialized = JsonSerializer.Deserialize<List<Animal>>(json, SerializerOptions);
-                    _animals = deserialized ?? new List<Animal>();
-                }
-                catch (Exception)
-                {
-                    _animals = new List<Animal>();
-                }
-            }
-            else
-            {
-                _animals = new List<Animal>();
-            }
+            _sessionFactory = sessionFactory;
         }
 
         public List<Animal> GetAllAnimals()
         {
-            return _animals;
+            using var session = _sessionFactory.OpenSession();
+            var nhAnimals = session.Query<NHAnimal>().ToList();
+            return nhAnimals.Select(ToDomain).ToList();
+        }
+
+        private static Animal ToDomain(NHAnimal nhAnimal)
+        {
+            return nhAnimal.Species.ToLower() switch
+            {
+                "dog" => new Dog(
+                    nhAnimal.Species,
+                    nhAnimal.Id,
+                    nhAnimal.Age,
+                    nhAnimal.PhysicalDescription,
+                    nhAnimal.PersonalityDescription,
+                    nhAnimal.Nickname),
+                "cat" => new Cat(
+                    nhAnimal.Species,
+                    nhAnimal.Id,
+                    nhAnimal.Age,
+                    nhAnimal.PhysicalDescription,
+                    nhAnimal.PersonalityDescription,
+                    nhAnimal.Nickname),
+                _ => throw new InvalidOperationException($"Unknown species: {nhAnimal.Species}")
+            };
         }
 
         public void AddAnimal(Animal animal)
         {
-            _animals.Add(animal);
-        }
+            using var session = _sessionFactory.OpenSession();
+            using var transaction = session.BeginTransaction();
 
-        public void SaveChanges()
-        {
             try
             {
-                var directory = Path.GetDirectoryName(DataFile);
-                if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
-                    Directory.CreateDirectory(directory);
-
-                using var fs = new FileStream(DataFile, FileMode.Create, FileAccess.Write);
-                using var writer = new Utf8JsonWriter(fs, new JsonWriterOptions { Indented = true });
-                JsonSerializer.Serialize(writer, _animals, SerializerOptions);
+                var nhAnimal = ToNHibernateEntity(animal);
+                session.Save(nhAnimal);
+                transaction.Commit();
             }
-            catch (Exception ex)
+            catch
             {
-                Console.WriteLine(string.Format(AppConstants.AnimalOperationErrorFormat, ex.Message));
+                transaction.Rollback();
+                throw;
             }
+        }
+
+        private static NHAnimal ToNHibernateEntity(Animal animal)
+        {
+            NHAnimal nhAnimal;
+            if (animal is Dog)
+            {
+                nhAnimal = new NHDog();
+            }
+            else if (animal is Cat)
+            {
+                nhAnimal = new NHCat();
+            }
+            else
+            {
+                throw new InvalidOperationException($"Unknown animal type: {animal.GetType().Name}");
+            }
+
+            // Use reflection to set the protected properties 'Id', 'Species', etc.
+            typeof(NHAnimal).GetProperty("Id")?.SetValue(nhAnimal, animal.Id);
+            typeof(NHAnimal).GetProperty("Species")?.SetValue(nhAnimal, animal.Species);
+            typeof(NHAnimal).GetProperty("Age")?.SetValue(nhAnimal, animal.Age);
+            typeof(NHAnimal).GetProperty("PhysicalDescription")?.SetValue(nhAnimal, animal.PhysicalDescription);
+            typeof(NHAnimal).GetProperty("PersonalityDescription")?.SetValue(nhAnimal, animal.PersonalityDescription);
+            typeof(NHAnimal).GetProperty("Nickname")?.SetValue(nhAnimal, animal.Nickname);            
+
+            return nhAnimal;
+        }
+
+        public Animal? GetById(string id)
+        {
+            using var session = _sessionFactory.OpenSession();
+            var nhAnimal = session.Get<NHAnimal>(id);
+            return nhAnimal != null ? ToDomain(nhAnimal) : null;
+        }
+
+        public void UpdateAnimal(Animal animal)
+        {
+            using var session = _sessionFactory.OpenSession();
+            using var transaction = session.BeginTransaction();
+            try
+            {
+                var nhAnimal = ToNHibernateEntity(animal);
+                session.Update(nhAnimal);
+                transaction.Commit();
+            }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
+        }
+
+        public void DeleteAnimal(Animal animal)
+        {
+            using var session = _sessionFactory.OpenSession();
+            using var transaction = session.BeginTransaction();
+
+            try
+            {
+                var nhAnimal = session.Get<NHAnimal>(animal.Id);
+                if (nhAnimal != null)
+                {
+                    session.Delete(nhAnimal);
+                }
+                transaction.Commit();
+            }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
+        }
+
+            public void SaveChanges()
+        {
+            //for compatibility with the interface            
         }
     }
 }
+
+
+        

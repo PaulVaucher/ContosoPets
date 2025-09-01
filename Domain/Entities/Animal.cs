@@ -2,12 +2,12 @@
 {
     public abstract class Animal
     {
-        public string Species { get; private set; } = string.Empty;
-        public string Id { get; private set; } = string.Empty;
-        public string Age { get; private set; } = "?";
-        public string PhysicalDescription { get; private set; } = string.Empty;
-        public string PersonalityDescription { get; private set; } = string.Empty;
-        public string Nickname { get; private set; } = string.Empty;
+        public string Species { get; private set; }
+        public virtual string Id { get; private set; }
+        public virtual string Age { get; private set; }
+        public virtual string PhysicalDescription { get; private set; }
+        public virtual string PersonalityDescription { get; private set; }
+        public virtual string Nickname { get; private set; }
 
         protected Animal() {}
         
@@ -21,15 +21,15 @@
             Nickname = nickname;
         }
 
-        public void SetAge(string value) => Age = value ?? "?";
+        public virtual void SetAge(string value) => Age = value ?? "?";
 
-        public void SetPhysicalDescription(string value) =>
+        public virtual void SetPhysicalDescription(string value) =>
             PhysicalDescription = value ?? "tbd";
 
-        public void SetPersonalityDescription(string value) =>
+        public virtual void SetPersonalityDescription(string value) =>
             PersonalityDescription = value ?? "tbd";
 
-        public void SetNickname(string value) =>
+        public virtual void SetNickname(string value) =>
             Nickname = value ?? "tbd";
 
         public virtual void DisplayInfo() 

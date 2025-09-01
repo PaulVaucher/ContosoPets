@@ -8,30 +8,41 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Folder Include="Resources\" />
 		<Folder Include="Scripts\build\" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Update="Resources\animals.json">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
 		<None Include="Scripts\build\post-build-cleanup.ps1" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Include="Presentation\ConsoleApp\appsettings.json">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+		<Content Include="Presentation\ConsoleApp\appsettings.*.json" Exclude="Presentation\ConsoleApp\appsettings.json">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
 	</ItemGroup>
 
 	<ItemGroup>
 	  <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.8" />
 	  <PackageReference Include="Scrutor" Version="6.1.0" />
+	  <PackageReference Include="NHibernate" Version="5.5.2" />
+	  <PackageReference Include="Npgsql" Version="8.0.3" />
+	  <PackageReference Include="NHibernate.Mapping.Attributes" Version="5.1.0" />
+	  <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
+	  <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
+	  <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />	
 	</ItemGroup>
 
-	<!-- Configuration du script post-build -->
+	<!-- Post-build script configuration -->
 	<Target Name="PostBuildCleanup" AfterTargets="Build">
 		<Message Text="Post-build cleanup running..." Importance="high" />
 
 		<Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\Scripts\build\post-build-cleanup.ps1&quot; -OutputPath &quot;$(OutputPath)&quot;" ContinueOnError="true" />
 	</Target>
 
-	<!-- Target pour nettoyage profond (manuel) -->
+	<!-- Target for deep cleanup (manual) -->
 	<Target Name="DeepClean">
 		<Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\Scripts\build\post-build-cleanup.ps1&quot; -OutputPath &quot;$(OutputPath)&quot; -DeepClean" ContinueOnError="true" />
 	</Target>

@@ -1,20 +1,30 @@
 ﻿using ContosoPets.Application.UseCases.Animals;
 using ContosoPets.Domain.Constants;
+using ContosoPets.Infrastructure.Database;
 using ContosoPets.Infrastructure.DI;
 using ContosoPets.Presentation.ConsoleApp.Commands;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System.Reflection;
 
 namespace ContosoPets.Presentation.ConsoleApp
 {
     static class Program
     {
-        static void Main(string[] args)
+        private static async Task InitializeDatabaseAsync(IServiceProvider serviceProvider)
+        {
+            var initializer = serviceProvider.GetRequiredService<DatabaseInitializer>();
+            await initializer.InitializeDatabaseAsync();
+        }
+
+        static async Task Main(string[] args)
         {
             try
             {
                 var serviceProvider = ConfigureServices();
                 using (serviceProvider)
                 {
+                    await InitializeDatabaseAsync(serviceProvider);
                     RunApplication(serviceProvider);
                 }
             }
@@ -31,7 +41,12 @@ namespace ContosoPets.Presentation.ConsoleApp
             try
             {
                 var services = new ServiceCollection();
-                services.AddInfrastructure();
+
+                var configuration = BuildConfiguration();
+
+                services.AddSingleton<IConfiguration>(configuration);
+                
+                services.AddInfrastructure(configuration);
                 return services.BuildServiceProvider();
             }
             catch (Exception ex)
@@ -39,6 +54,53 @@ namespace ContosoPets.Presentation.ConsoleApp
                 throw new InvalidOperationException(
                     string.Format(AppConstants.ServiceConfigurationErrorFormat, ex.Message), ex);
             }
+        }
+
+        private static IConfiguration BuildConfiguration()
+        {
+            var builder = new ConfigurationBuilder();
+
+            // Essayer plusieurs emplacements pour les fichiers de configuration
+            var possiblePaths = new[]
+            {
+                AppContext.BaseDirectory,
+                Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
+                Directory.GetCurrentDirectory(),
+                Path.Combine(Directory.GetCurrentDirectory(), "Presentation", "ConsoleApp"),
+                Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "Presentation", "ConsoleApp")
+            };
+
+            string? configPath = null;
+            foreach (var path in possiblePaths.Where(p => !string.IsNullOrEmpty(p)))
+            {
+                var settingsFile = Path.Combine(path!, "appsettings.json");
+                if (File.Exists(settingsFile))
+                {
+                    configPath = path;
+                    break;
+                }
+            }
+
+            if (configPath != null)
+            {
+                builder.SetBasePath(configPath)
+                       .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                       .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Development"}.json", optional: true, reloadOnChange: true);
+            }
+            else
+            {
+                // Configuration de fallback en dur
+                Console.WriteLine("Fichiers de configuration non trouvés, utilisation de la configuration par défaut.");
+                builder.AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    ["ConnectionStrings:DefaultConnection"] = "Host=localhost;Port=5432;Database=contoso_pets;Username=postgres;Password=postgres",
+                    ["NHibernate:ShowSql"] = "true",
+                    ["NHibernate:FormatSql"] = "true",
+                    ["NHibernate:SchemaAction"] = "create-drop"
+                });
+            }
+
+            return builder.Build();
         }
 
         private static void RunApplication(ServiceProvider serviceProvider)

@@ -100,11 +100,12 @@ namespace ContosoPets.Infrastructure.Services
                         hasChanges = true;
                     }
                 }
-            }
-            if (hasChanges)
-            {
-                repository.SaveChanges();
-            }
+                if (hasChanges)
+                {
+                    repository.UpdateAnimal(animal);
+                    hasChanges = false;
+                }
+            }            
         }
 
         public List<Animal> GetAnimalsWithIncompleteNicknameOrPersonality()
@@ -135,11 +136,12 @@ namespace ContosoPets.Infrastructure.Services
                         hasChanges = true;
                     }
                 }
-            }
-            if (hasChanges)
-            {
-                repository.SaveChanges();
-            }
+                if (hasChanges)
+                {
+                    repository.UpdateAnimal(animal);
+                    hasChanges = false;
+                }
+            }            
         }
 
         public Animal? GetAnimalById(string id)
@@ -153,7 +155,7 @@ namespace ContosoPets.Infrastructure.Services
             if (animal != null)
             {
                 animal.SetAge(newAge);
-                repository.SaveChanges();
+                repository.UpdateAnimal(animal);
                 return true;
             }
             return false;
@@ -165,7 +167,7 @@ namespace ContosoPets.Infrastructure.Services
             if (animal != null)
             {
                 animal.SetPersonalityDescription(newPersonality);
-                repository.SaveChanges();
+                repository.UpdateAnimal(animal);
                 return true;
             }
             return false;
