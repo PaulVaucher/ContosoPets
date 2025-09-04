@@ -71,7 +71,7 @@ namespace ContosoPets.Domain.Builders
         public Animal Build()
         {             
             if (string.IsNullOrEmpty(_species))
-                throw new InvalidOperationException("Species must be specified.");
+                throw new InvalidOperationException("Invalid input. Please enter 'dog' or 'cat'.");
             if (string.IsNullOrEmpty(_id))
                 throw new InvalidOperationException("ID must be specified."); // ID automatically generated donc pas indispensable
 

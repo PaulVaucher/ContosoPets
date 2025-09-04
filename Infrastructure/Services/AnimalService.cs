@@ -12,6 +12,12 @@ namespace ContosoPets.Infrastructure.Services
         private const string UnknownAge = "?";
         private const string DefaultValue = "tbd";
 
+        private static readonly HashSet<string> SupportedSpecies = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "dog",
+        "cat"
+    };
+
         public List<Animal> ListAll()
         {
             return repository.GetAllAnimals().ToList();
@@ -31,7 +37,7 @@ namespace ContosoPets.Infrastructure.Services
                 };
             }
 
-            if (request.Species != "dog" && request.Species != "cat")
+            if (!SupportedSpecies.Contains(request.Species))
             {
                 return new AddAnimalResult
                 {
@@ -85,27 +91,35 @@ namespace ContosoPets.Infrastructure.Services
         {
             var animals = ListAll();
             bool hasChanges = false;
+
             foreach (var animal in animals)
             {
                 if (corrections.TryGetValue(animal.Id, out var values))
                 {
+                    bool animalModified = false;
+
                     if (!string.IsNullOrEmpty(values.Age) && values.Age != UnknownAge)
                     {
                         animal.SetAge(values.Age);
-                        hasChanges = true;
+                        animalModified = true;
                     }
                     if (!string.IsNullOrEmpty(values.PhysicalDescription) && values.PhysicalDescription != DefaultValue)
                     {
                         animal.SetPhysicalDescription(values.PhysicalDescription);
+                        animalModified = true;
+                    }
+
+                    if (animalModified)
+                    {
+                        repository.UpdateAnimal(animal);
                         hasChanges = true;
                     }
                 }
-                if (hasChanges)
-                {
-                    repository.UpdateAnimal(animal);
-                    hasChanges = false;
-                }
-            }            
+            }
+            if (hasChanges)
+            {
+                repository.SaveChanges();
+            }
         }
 
         public List<Animal> GetAnimalsWithIncompleteNicknameOrPersonality()
@@ -121,27 +135,35 @@ namespace ContosoPets.Infrastructure.Services
         {
             var animals = ListAll();
             bool hasChanges = false;
+
             foreach (var animal in animals)
             {
                 if (corrections.TryGetValue(animal.Id, out var values))
                 {
+                    bool animalModified = false;
+
                     if (!string.IsNullOrEmpty(values.Nickname) && values.Nickname != DefaultValue)
                     {
                         animal.SetNickname(values.Nickname);
-                        hasChanges = true;
+                        animalModified = true;
                     }
                     if (!string.IsNullOrEmpty(values.Personality) && values.Personality != DefaultValue)
                     {
                         animal.SetPersonalityDescription(values.Personality);
+                        animalModified = true;
+                    }
+
+                    if (animalModified)
+                    {
+                        repository.UpdateAnimal(animal);
                         hasChanges = true;
                     }
                 }
-                if (hasChanges)
-                {
-                    repository.UpdateAnimal(animal);
-                    hasChanges = false;
-                }
-            }            
+            }
+            if (hasChanges)
+            {
+                repository.SaveChanges();
+            }
         }
 
         public Animal? GetAnimalById(string id)
@@ -175,6 +197,9 @@ namespace ContosoPets.Infrastructure.Services
 
         public List<Animal> GetAnimalsWithCharacteristic(string species, string characteristic)
         {
+            if (string.IsNullOrEmpty(species) || string.IsNullOrEmpty(characteristic))
+                return [];
+
             return ListAll()
                 .Where(a => a.Species.Equals(species, StringComparison.OrdinalIgnoreCase)
                 && !string.IsNullOrEmpty(a.Id)
