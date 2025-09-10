@@ -21,7 +21,7 @@ namespace ContosoPets.Presentation.ConsoleApp.Commands
                 Console.WriteLine(AppConstants.PetLimitReachedMessage);
                 return;
             }
-            
+
             Console.WriteLine(string.Format(AppConstants.CurrentPetsStatusFormat, petCount, MaxPets - petCount));
             string anotherPet = CanYes;
 

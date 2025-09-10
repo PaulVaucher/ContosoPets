@@ -83,7 +83,7 @@ namespace ContosoPets.Infrastructure.Repositories
             typeof(NHAnimal).GetProperty("Age")?.SetValue(nhAnimal, animal.Age);
             typeof(NHAnimal).GetProperty("PhysicalDescription")?.SetValue(nhAnimal, animal.PhysicalDescription);
             typeof(NHAnimal).GetProperty("PersonalityDescription")?.SetValue(nhAnimal, animal.PersonalityDescription);
-            typeof(NHAnimal).GetProperty("Nickname")?.SetValue(nhAnimal, animal.Nickname);            
+            typeof(NHAnimal).GetProperty("Nickname")?.SetValue(nhAnimal, animal.Nickname);
 
             return nhAnimal;
         }
@@ -133,7 +133,7 @@ namespace ContosoPets.Infrastructure.Repositories
             }
         }
 
-            public void SaveChanges()
+        public void SaveChanges()
         {
             //for compatibility with the interface            
         }
@@ -141,4 +141,3 @@ namespace ContosoPets.Infrastructure.Repositories
 }
 
 
-        

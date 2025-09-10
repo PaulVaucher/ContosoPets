@@ -1,6 +1,6 @@
-﻿using Npgsql;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Npgsql;
 
 namespace ContosoPets.Infrastructure.Database
 {
@@ -30,7 +30,7 @@ namespace ContosoPets.Infrastructure.Database
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred during database initialization.");                
+                _logger.LogError(ex, "An error occurred during database initialization.");
             }
         }
 

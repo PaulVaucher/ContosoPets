@@ -45,7 +45,7 @@ namespace ContosoPets.Presentation.ConsoleApp
                 var configuration = BuildConfiguration();
 
                 services.AddSingleton<IConfiguration>(configuration);
-                
+
                 services.AddInfrastructure(configuration);
                 return services.BuildServiceProvider();
             }

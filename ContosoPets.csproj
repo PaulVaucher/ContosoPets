@@ -8,6 +8,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<Compile Remove="ContosoPets.UnitTests\**" />
+		<EmbeddedResource Remove="ContosoPets.UnitTests\**" />
+		<None Remove="ContosoPets.UnitTests\**" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<Folder Include="Scripts\build\" />
 	</ItemGroup>
 
@@ -32,7 +38,7 @@
 	  <PackageReference Include="NHibernate.Mapping.Attributes" Version="5.1.0" />
 	  <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
 	  <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
-	  <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />	
+	  <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />	  
 	</ItemGroup>
 
 	<!-- Post-build script configuration -->

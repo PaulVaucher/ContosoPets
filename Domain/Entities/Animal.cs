@@ -9,8 +9,8 @@
         public string PersonalityDescription { get; private set; } = "tbd";
         public string Nickname { get; private set; } = "tbd";
 
-        protected Animal() {}
-        
+        protected Animal() { }
+
         protected Animal(string species, string id, string age, string physicalDescription, string personalityDescription, string nickname)
         {
             Species = species;
@@ -32,7 +32,7 @@
         public virtual void SetNickname(string value) =>
             Nickname = string.IsNullOrEmpty(value) ? "tbd" : value;
 
-        public virtual void DisplayInfo() 
+        public virtual void DisplayInfo()
         {
             Console.WriteLine($"ID: {Id}");
             Console.WriteLine($"Species: {Species}");

@@ -7,7 +7,7 @@ namespace ContosoPets.Presentation.ConsoleApp.Commands
     public static class CommandRegistry
     {
         public static (List<MenuCommandEntry> OrderedList, Dictionary<MenuOptionEnum, IMenuCommand> Lookup)
-        BuildCommandRegistry(IAnimalService service, Action exitCallback)        
+        BuildCommandRegistry(IAnimalService service, Action exitCallback)
         {
             var list = new List<MenuCommandEntry>
             {

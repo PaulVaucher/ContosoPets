@@ -25,7 +25,7 @@ namespace ContosoPets.Infrastructure.DI
 
             services.AddSingleton<DatabaseInitializer>();
             services.AddInjectablesFromAssembly(typeof(IAssemblyReference).Assembly);
-            
+
             return services;
         }
 

@@ -1,5 +1,5 @@
-﻿using ContosoPets.Domain.Entities;
-using ContosoPets.Domain.Constants;
+﻿using ContosoPets.Domain.Constants;
+using ContosoPets.Domain.Entities;
 
 namespace ContosoPets.Domain.Builders
 {
@@ -19,7 +19,7 @@ namespace ContosoPets.Domain.Builders
 
         public static AnimalBuilder Builder()
         {
-          return new AnimalBuilder();
+            return new AnimalBuilder();
         }
 
         private void Reset()
@@ -69,7 +69,7 @@ namespace ContosoPets.Domain.Builders
         }
 
         public Animal Build()
-        {             
+        {
             if (string.IsNullOrEmpty(_species))
                 throw new InvalidOperationException("Invalid input. Please enter 'dog' or 'cat'.");
             if (string.IsNullOrEmpty(_id))
@@ -77,8 +77,8 @@ namespace ContosoPets.Domain.Builders
 
             Animal result = _species switch
             {
-                "dog" => new Dog("dog",_id, _age, _physicalDescription, _personalityDescription, _nickname),
-                "cat" => new Cat("cat",_id, _age, _physicalDescription, _personalityDescription, _nickname),
+                "dog" => new Dog("dog", _id, _age, _physicalDescription, _personalityDescription, _nickname),
+                "cat" => new Cat("cat", _id, _age, _physicalDescription, _personalityDescription, _nickname),
                 _ => throw new InvalidOperationException(AppConstants.InvalidSpeciesMessage)
             };
 

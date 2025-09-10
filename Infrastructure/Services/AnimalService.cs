@@ -1,8 +1,8 @@
-﻿using ContosoPets.Application.UseCases.Animals;
-using ContosoPets.Domain.Entities;
-using ContosoPets.Application.Ports;
-using ContosoPets.Domain.Constants;
+﻿using ContosoPets.Application.Ports;
+using ContosoPets.Application.UseCases.Animals;
 using ContosoPets.Domain.Builders;
+using ContosoPets.Domain.Constants;
+using ContosoPets.Domain.Entities;
 
 namespace ContosoPets.Infrastructure.Services
 {

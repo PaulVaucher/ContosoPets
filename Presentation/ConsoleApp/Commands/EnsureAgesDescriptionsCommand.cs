@@ -42,5 +42,5 @@ namespace ContosoPets.Presentation.ConsoleApp.Commands
             _service.CompleteAgesAndDescriptions(corrections);
             Console.WriteLine(AppConstants.AgeAndDescriptionCompleteMessage);
         }
-    }    
+    }
 }

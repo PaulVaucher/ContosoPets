@@ -16,7 +16,7 @@ namespace ContosoPets.Infrastructure.Mappings
                 m.Column("id");
                 m.Type(NHibernateUtil.String);
                 m.Length(10);
-                m.Generator(Generators.Assigned);                
+                m.Generator(Generators.Assigned);
             });
 
             Property(x => x.Species, m =>

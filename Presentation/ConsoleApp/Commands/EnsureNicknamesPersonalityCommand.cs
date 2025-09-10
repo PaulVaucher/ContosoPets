@@ -37,7 +37,7 @@ namespace ContosoPets.Presentation.ConsoleApp.Commands
                 if (string.IsNullOrEmpty(animal.PersonalityDescription) || animal.PersonalityDescription == "tbd")
                 {
                     Console.WriteLine(string.Format(AppConstants.PersonalityDescriptionPromptFormat, animal.Id));
-                    personality = Console.ReadLine() ?? string.Empty;                    
+                    personality = Console.ReadLine() ?? string.Empty;
                 }
                 corrections[animal.Id] = (nickname, personality);
             }
