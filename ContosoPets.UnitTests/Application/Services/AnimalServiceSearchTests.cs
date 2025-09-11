@@ -29,7 +29,14 @@ namespace ContosoPets.UnitTests.Application.Services
                 new Dog("dog", "d2", "2 years", "Black fur", "Playful", "Buddy"), // Complete
                 new Cat("cat", "c2", "", "", "Curious", "Mittens") // Empty age and physical description
             };
-            _mockRepository.Setup(r => r.GetAllAnimals()).Returns(animals);
+
+            var filteredAnimals = animals.Where(a =>
+                string.IsNullOrWhiteSpace(a.Age) || a.Age == "?" ||
+                string.IsNullOrWhiteSpace(a.PhysicalDescription) || a.PhysicalDescription.ToLower() == "tbd"
+            ).ToList();
+
+            _mockRepository.Setup(r => r.GetAnimalsWithIncompleteAgeOrDescription())
+                .Returns(filteredAnimals);
 
             // Act
             var result = _animalService.GetAnimalsWithIncompleteAgeOrDescription();
@@ -53,7 +60,14 @@ namespace ContosoPets.UnitTests.Application.Services
                 new Dog("dog", "d2", "2 years", "Black fur", "Playful", "Buddy"), // Complete
                 new Cat("cat", "c2", "1 year", "Tabby", "Curious", "tbd") // Incomplete nickname
             };
-            _mockRepository.Setup(r => r.GetAllAnimals()).Returns(animals);
+
+            var filteredAnimals = animals.Where(a =>
+                string.IsNullOrWhiteSpace(a.PersonalityDescription) || a.PersonalityDescription.ToLower() == "tbd" ||
+                string.IsNullOrWhiteSpace(a.Nickname) || a.Nickname.ToLower() == "tbd"
+            ).ToList();
+
+            _mockRepository.Setup(r => r.GetAnimalsWithIncompleteNicknameOrPersonality())
+                .Returns(filteredAnimals);
 
             // Act
             var result = _animalService.GetAnimalsWithIncompleteNicknameOrPersonality();
@@ -64,6 +78,8 @@ namespace ContosoPets.UnitTests.Application.Services
             result.Should().Contain(a => a.Id == "c1");
             result.Should().Contain(a => a.Id == "c2");
             result.Should().NotContain(a => a.Id == "d2");
+
+            
         }
 
         [Theory]
@@ -76,20 +92,35 @@ namespace ContosoPets.UnitTests.Application.Services
             string species, string characteristic, int expectedCount)
         {
             // Arrange
-            var animals = new List<Animal>
+            var filteredResults = new List<Animal>();
+
+            if (species.Equals("dog", StringComparison.OrdinalIgnoreCase))
             {
-                new Dog("dog", "d1", "2 years", "Golden fur", "Friendly and playful", "Rex"),
-                new Dog("dog", "d2", "3 years", "Black fur", "Loyal and protective", "Buddy"),
-                new Cat("cat", "c1", "1 year", "Tabby with black stripes", "Curious and independent", "Whiskers"),
-                new Cat("cat", "c2", "4 years", "White fur", "Calm and affectionate", "Snowball")
-            };
-            _mockRepository.Setup(r => r.GetAllAnimals()).Returns(animals);
+                if (characteristic.Equals("friendly", StringComparison.OrdinalIgnoreCase) ||
+                    characteristic.Equals("playful", StringComparison.OrdinalIgnoreCase))
+                {
+                    filteredResults.Add(new Dog("dog", "d1", "2 years", "Golden fur", "Friendly and playful", "Rex"));
+                }
+                else if (characteristic.Equals("golden", StringComparison.OrdinalIgnoreCase))
+                {
+                    filteredResults.Add(new Dog("dog", "d1", "2 years", "Golden fur", "Friendly and playful", "Rex"));
+                }
+            }
+            else if (species.Equals("cat", StringComparison.OrdinalIgnoreCase))
+            {
+                if (characteristic.Equals("black", StringComparison.OrdinalIgnoreCase))
+                {
+                    filteredResults.Add(new Cat("cat", "c1", "1 year", "Tabby with black stripes", "Curious and independent", "Whiskers"));
+                }
+            }
+            _mockRepository.Setup(r => r.GetAnimalsWithCharacteristic(species, characteristic))
+                .Returns(filteredResults);
 
             // Act
             var result = _animalService.GetAnimalsWithCharacteristic(species, characteristic);
 
             // Assert
-            result.Should().HaveCount(expectedCount);
+            result.Should().HaveCount(expectedCount);          
         }
     }
 }

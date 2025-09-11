@@ -1,4 +1,5 @@
 ﻿using ContosoPets.Application.Ports;
+using ContosoPets.Domain.Constants;
 using ContosoPets.Domain.Entities;
 using ContosoPets.Infrastructure.Entities;
 using NHibernate;
@@ -41,6 +42,14 @@ namespace ContosoPets.Infrastructure.Repositories
                     nhAnimal.Nickname),
                 _ => throw new InvalidOperationException($"Unknown species: {nhAnimal.Species}")
             };
+        }
+
+        public int GetAnimalCount()
+        {
+            using var session = _sessionFactory.OpenSession();
+            return session.Query<NHAnimal>()
+                .Where(a => !string.IsNullOrEmpty(a.Id))
+                .Count();
         }
 
         public void AddAnimal(Animal animal)
@@ -131,6 +140,43 @@ namespace ContosoPets.Infrastructure.Repositories
                 transaction.Rollback();
                 throw;
             }
+        }
+        
+        public List<Animal> GetAnimalsWithIncompleteAgeOrDescription()
+        {
+            using var session = _sessionFactory.OpenSession();
+            var nhAnimals = session.Query<NHAnimal>()
+                .Where(a => !string.IsNullOrEmpty(a.Id) &&
+                            (string.IsNullOrEmpty(a.Age) || a.Age == AppConstants.UnknownAge ||
+                             string.IsNullOrEmpty(a.PhysicalDescription) || a.PhysicalDescription == AppConstants.DefaultValue))
+                .ToList();
+
+            return nhAnimals.Select(ToDomain).ToList();
+        }
+
+        public List<Animal> GetAnimalsWithIncompleteNicknameOrPersonality()
+        {
+            using var session = _sessionFactory.OpenSession();
+            var nhAnimals = session.Query<NHAnimal>()
+                .Where(a => !string.IsNullOrEmpty(a.Id) &&
+                            (string.IsNullOrEmpty(a.Nickname) || a.Nickname == AppConstants.DefaultValue ||
+                             string.IsNullOrEmpty(a.PersonalityDescription) || a.PersonalityDescription == AppConstants.DefaultValue))
+                .ToList();
+
+            return nhAnimals.Select(ToDomain).ToList();
+        }
+
+        public List<Animal> GetAnimalsWithCharacteristic(string species, string characteristic)
+        {
+            using var session = _sessionFactory.OpenSession();
+            var nhAnimals = session.Query<NHAnimal>()
+                .Where(a => a.Species.Equals(species, StringComparison.OrdinalIgnoreCase)
+                && !string.IsNullOrEmpty(a.Id)
+                && (a.PhysicalDescription.Contains(characteristic, StringComparison.OrdinalIgnoreCase) ||
+                    a.PersonalityDescription.Contains(characteristic, StringComparison.OrdinalIgnoreCase)))
+                .ToList();
+
+            return nhAnimals.Select(ToDomain).ToList();
         }
 
         public void SaveChanges()

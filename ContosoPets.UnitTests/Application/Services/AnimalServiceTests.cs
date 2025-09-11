@@ -23,8 +23,7 @@ namespace ContosoPets.UnitTests.Application.Services
         public void AddNewAnimal_WhenPetLimitReached_ShouldReturnFailure()
         {
             // Arrange
-            var existingAnimals = CreateAnimalList(8);
-            _mockRepository.Setup(r => r.GetAllAnimals()).Returns(existingAnimals);
+            _mockRepository.Setup(r => r.GetAnimalCount()).Returns(8);
 
             var request = new AddAnimalRequest
             {
@@ -48,7 +47,7 @@ namespace ContosoPets.UnitTests.Application.Services
         public void AddNewAnimal_WithValidRequest_ShouldReturnSuccess()
         {
             // Arrange
-            _mockRepository.Setup(r => r.GetAllAnimals()).Returns(new List<Animal>());
+            _mockRepository.Setup(r => r.GetAnimalCount()).Returns(0);
 
             var request = new AddAnimalRequest
             {
@@ -78,7 +77,7 @@ namespace ContosoPets.UnitTests.Application.Services
         public void AddNewAnimal_WhitInvalidSpecies_ShouldReturnFailure(string invalidSpecies)
         {
             // Arrange
-            _mockRepository.Setup(r => r.GetAllAnimals()).Returns(new List<Animal>());
+            _mockRepository.Setup(r => r.GetAnimalCount()).Returns(0);
 
             var request = new AddAnimalRequest
             {
@@ -96,16 +95,6 @@ namespace ContosoPets.UnitTests.Application.Services
             result.Success.Should().BeFalse();
             result.ErrorMessage.Should().Be("Invalid input. Please enter 'dog' or 'cat'.");
             result.Animal.Should().BeNull();
-        }
-
-        private static List<Animal> CreateAnimalList(int count)
-        {
-            var animals = new List<Animal>();
-            for (int i = 1; i <= count; i++)
-            {
-                animals.Add(new Dog("dog", $"d{i}", "2", "desc", "personality", "name"));
-            }
-            return animals;
         }
     }
 }

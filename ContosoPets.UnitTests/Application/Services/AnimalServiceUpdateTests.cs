@@ -23,26 +23,24 @@ namespace ContosoPets.UnitTests.Application.Services
         public void UpdateAnimalAge_WithExistingId_ShouldReturnTrueAndUpdate()
         {
             // Arrange
-            var animals = new List<Animal>
-            {
-                new Dog("dog", "d1", "old", "Golden fur", "Friendly", "Rex")
-            };
-            _mockRepository.Setup(r => r.GetAllAnimals()).Returns(animals);
+            var animal = new Dog("dog", "d1", "old", "Golden fur", "Friendly", "Rex");
+
+            _mockRepository.Setup(r => r.GetById("d1")).Returns(animal);
 
             // Act
             var result = _animalService.UpdateAnimalAge("d1", "5 years");
 
             // Assert
             result.Should().BeTrue();
-            animals[0].Age.Should().Be("5 years");
-            _mockRepository.Verify(r => r.UpdateAnimal(It.IsAny<Animal>()), Times.Once);
+            animal.Age.Should().Be("5 years");
+            _mockRepository.Verify(r => r.UpdateAnimal(animal), Times.Once);
         }
 
         [Fact]
         public void UpdateAnimalAge_WithNonExistentId_ShouldReturnFalse()
         {
             // Arrange            
-            _mockRepository.Setup(r => r.GetAllAnimals()).Returns(new List<Animal>());
+            _mockRepository.Setup(r => r.GetById("nonexistent")).Returns((Animal?)null);
 
             // Act
             var result = _animalService.UpdateAnimalAge("nonexistent", "5 years");
@@ -56,12 +54,11 @@ namespace ContosoPets.UnitTests.Application.Services
         public void CompleteAgesAndDescriptions_ShouldUpdateOnlySpecifiedFileds()
         {
             // Arrange
-            var animals = new List<Animal>
-            {
-                new Dog("dog", "d1", "?", "tbd", "Friendly", "Rex"),
-                new Cat("cat", "c1", "old", "black", "Independent", "Whiskers"),
-            };
-            _mockRepository.Setup(r => r.GetAllAnimals()).Returns(animals);
+            var dog = new Dog("dog", "d1", "?", "tbd", "Friendly", "Rex");
+            var cat = new Cat("cat", "c1", "old", "black", "Independent", "Whiskers");
+
+            _mockRepository.Setup(r => r.GetById("d1")).Returns(dog);
+            _mockRepository.Setup(r => r.GetById("c1")).Returns(cat);
 
             var corrections = new Dictionary<string, (string Age, string PhysicalDescription)>
             {
@@ -73,11 +70,12 @@ namespace ContosoPets.UnitTests.Application.Services
             _animalService.CompleteAgesAndDescriptions(corrections);
 
             // Assert
-            animals[0].Age.Should().Be("3 years");
-            animals[0].PhysicalDescription.Should().Be("Golden fur");
-            animals[1].Age.Should().Be("2 years");
-            animals[1].PhysicalDescription.Should().Be("Silky black");
-            _mockRepository.Verify(r => r.UpdateAnimal(It.IsAny<Animal>()), Times.Exactly(2));
+            dog.Age.Should().Be("3 years");
+            dog.PhysicalDescription.Should().Be("Golden fur");
+            cat.Age.Should().Be("2 years");
+            cat.PhysicalDescription.Should().Be("Silky black");
+            _mockRepository.Verify(r => r.UpdateAnimal(dog), Times.Once);
+            _mockRepository.Verify(r => r.UpdateAnimal(cat), Times.Once);            
         }
     }
 }
