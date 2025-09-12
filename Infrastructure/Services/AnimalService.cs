@@ -20,41 +20,53 @@ namespace ContosoPets.Infrastructure.Services
             return repository.GetAllAnimals().ToList();
         }
 
-        public AddAnimalResult AddNewAnimal(AddAnimalRequest request)
+        private string? ValidateNewAnimal(AddAnimalRequest request, int petCount)
         {
-            int petCount = repository.GetAnimalCount();
-
             if (petCount >= AppConstants.MaxPets)
             {
-                return new AddAnimalResult
-                {
-                    Success = false,
-                    ErrorMessage = AppConstants.PetLimitReachedMessage
-                };
+                return AppConstants.PetLimitReachedMessage;                
             }
-
-            if (!SupportedSpecies.Contains(request.Species))
+            if (string.IsNullOrWhiteSpace(request.Species) || !SupportedSpecies.Contains(request.Species))
             {
-                return new AddAnimalResult
-                {
-                    Success = false,
-                    ErrorMessage = AppConstants.InvalidSpeciesMessage
-                };
+                return AppConstants.InvalidSpeciesMessage;
             }
+            return null;
+        }
 
-            string id = Animal.GenerateId(request.Species, petCount + 1);
+        private string GenerateId(string species, int nextIndex) =>
+            Animal.GenerateId(species, nextIndex);
 
-            var builder = AnimalBuilder.Builder()
+        private Animal BuildAnimal(AddAnimalRequest request, string id)
+        {
+            return AnimalBuilder.Builder()
                 .WithSpecies(request.Species)
                 .WithId(id)
                 .WithAge(request.Age)
                 .WithPhysicalDescription(request.PhysicalDescription)
                 .WithPersonalityDescription(request.PersonalityDescription)
-                .WithNickname(request.Nickname);
+                .WithNickname(request.Nickname)
+                .Build();
+        }
+
+        public AddAnimalResult AddNewAnimal(AddAnimalRequest request)
+        {
+            int petCount = repository.GetAnimalCount();
+            var validationError = ValidateNewAnimal(request, petCount);
+
+            if (validationError is not null)
+            {
+                return new AddAnimalResult
+                {
+                    Success = false,
+                    ErrorMessage = validationError
+                };
+            }
+            
+            string id = GenerateId(request.Species, petCount + 1);
 
             try
             {
-                var newAnimal = builder.Build();
+                var newAnimal = BuildAnimal(request, id);
                 repository.AddAnimal(newAnimal);
                 repository.SaveChanges();
 

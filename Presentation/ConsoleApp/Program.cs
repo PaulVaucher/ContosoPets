@@ -60,7 +60,6 @@ namespace ContosoPets.Presentation.ConsoleApp
         {
             var builder = new ConfigurationBuilder();
 
-            // Essayer plusieurs emplacements pour les fichiers de configuration
             var possiblePaths = new[]
             {
                 AppContext.BaseDirectory,
@@ -88,8 +87,7 @@ namespace ContosoPets.Presentation.ConsoleApp
                        .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Development"}.json", optional: true, reloadOnChange: true);
             }
             else
-            {
-                // Configuration de fallback en dur
+            {                
                 Console.WriteLine("Fichiers de configuration non trouvés, utilisation de la configuration par défaut.");
                 builder.AddInMemoryCollection(new Dictionary<string, string?>
                 {
