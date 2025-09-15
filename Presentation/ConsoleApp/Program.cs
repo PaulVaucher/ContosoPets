@@ -72,7 +72,7 @@ namespace ContosoPets.Presentation.ConsoleApp
             string? configPath = null;
             foreach (var path in possiblePaths.Where(p => !string.IsNullOrEmpty(p)))
             {
-                var settingsFile = Path.Combine(path!, "appsettings.json");
+                var settingsFile = Path.Combine(path!, ProgramConstants.AppSettingsFileName);
                 if (File.Exists(settingsFile))
                 {
                     configPath = path;
@@ -83,18 +83,18 @@ namespace ContosoPets.Presentation.ConsoleApp
             if (configPath != null)
             {
                 builder.SetBasePath(configPath)
-                       .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                       .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Development"}.json", optional: true, reloadOnChange: true);
+                       .AddJsonFile(ProgramConstants.AppSettingsFileName, optional: false, reloadOnChange: true)
+                       .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable(ProgramConstants.EnvironmentVariable) ?? ProgramConstants.DevelopmentEnvironment}.json", optional: true, reloadOnChange: true);
             }
             else
             {                
-                Console.WriteLine("Fichiers de configuration non trouvés, utilisation de la configuration par défaut.");
+                Console.WriteLine(ProgramConstants.ConfigurationFilesNotFoundMessage);
                 builder.AddInMemoryCollection(new Dictionary<string, string?>
                 {
-                    ["ConnectionStrings:DefaultConnection"] = "Host=localhost;Port=5432;Database=contoso_pets;Username=postgres;Password=postgres",
-                    ["NHibernate:ShowSql"] = "true",
-                    ["NHibernate:FormatSql"] = "true",
-                    ["NHibernate:SchemaAction"] = "create-drop"
+                    ["ConnectionStrings:DefaultConnection"] = ProgramConstants.DefaultConnectionString,
+                    ["NHibernate:ShowSql"] = ProgramConstants.DefaultShowSql,
+                    ["NHibernate:FormatSql"] = ProgramConstants.DefaultFormatSql,
+                    ["NHibernate:SchemaAction"] = ProgramConstants.DefaultSchemaAction
                 });
             }
 

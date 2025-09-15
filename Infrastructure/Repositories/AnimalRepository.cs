@@ -48,7 +48,7 @@ namespace ContosoPets.Infrastructure.Repositories
         {
             using var session = _sessionFactory.OpenSession();
             return session.Query<NHAnimal>()
-                .Where(a => !string.IsNullOrEmpty(a.Id))
+                .Where(a => a.Id != null && a.Id != "")
                 .Count();
         }
 
@@ -146,9 +146,9 @@ namespace ContosoPets.Infrastructure.Repositories
         {
             using var session = _sessionFactory.OpenSession();
             var nhAnimals = session.Query<NHAnimal>()
-                .Where(a => !string.IsNullOrEmpty(a.Id) &&
-                            (string.IsNullOrEmpty(a.Age) || a.Age == AppConstants.UnknownAge ||
-                             string.IsNullOrEmpty(a.PhysicalDescription) || a.PhysicalDescription == AppConstants.DefaultValue))
+                .Where(a => a.Id != null && a.Id != "" &&
+                            ((a.Nickname == null || a.Nickname == "" || a.Nickname == AppConstants.DefaultValue) ||
+                             (a.PersonalityDescription == null || a.PersonalityDescription == "" || a.PersonalityDescription == AppConstants.DefaultValue)))
                 .ToList();
 
             return nhAnimals.Select(ToDomain).ToList();
@@ -158,9 +158,9 @@ namespace ContosoPets.Infrastructure.Repositories
         {
             using var session = _sessionFactory.OpenSession();
             var nhAnimals = session.Query<NHAnimal>()
-                .Where(a => !string.IsNullOrEmpty(a.Id) &&
-                            (string.IsNullOrEmpty(a.Nickname) || a.Nickname == AppConstants.DefaultValue ||
-                             string.IsNullOrEmpty(a.PersonalityDescription) || a.PersonalityDescription == AppConstants.DefaultValue))
+                .Where(a => a.Id != null && a.Id != "" &&
+                            ((a.Nickname == null || a.Nickname == "" || a.Nickname == AppConstants.DefaultValue) ||
+                             (a.PersonalityDescription == null || a.PersonalityDescription == "" || a.PersonalityDescription == AppConstants.DefaultValue)))
                 .ToList();
 
             return nhAnimals.Select(ToDomain).ToList();
@@ -169,11 +169,15 @@ namespace ContosoPets.Infrastructure.Repositories
         public List<Animal> GetAnimalsWithCharacteristic(string species, string characteristic)
         {
             using var session = _sessionFactory.OpenSession();
+
+            var lowerSpecies = species.ToLower();
+            var lowerCharacteristic = characteristic.ToLower();
+
             var nhAnimals = session.Query<NHAnimal>()
-                .Where(a => a.Species.Equals(species, StringComparison.OrdinalIgnoreCase)
-                && !string.IsNullOrEmpty(a.Id)
-                && (a.PhysicalDescription.Contains(characteristic, StringComparison.OrdinalIgnoreCase) ||
-                    a.PersonalityDescription.Contains(characteristic, StringComparison.OrdinalIgnoreCase)))
+                .Where(a => a.Species.ToLower() == lowerSpecies
+                && a.Id != null && a.Id != ""
+                && (a.PhysicalDescription.ToLower().Contains(lowerCharacteristic) ||
+                    a.PersonalityDescription.ToLower().Contains(lowerCharacteristic)))
                 .ToList();
 
             return nhAnimals.Select(ToDomain).ToList();
