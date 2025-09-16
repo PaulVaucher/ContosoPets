@@ -5,12 +5,12 @@
         public string Species { get; private set; } = string.Empty;
         public string Id { get; private set; } = string.Empty;
         public string Age { get; private set; } = "?";
-        public string PhysicalDescription { get; private set; } = string.Empty;
-        public string PersonalityDescription { get; private set; } = string.Empty;
-        public string Nickname { get; private set; } = string.Empty;
+        public string PhysicalDescription { get; private set; } = "tbd";
+        public string PersonalityDescription { get; private set; } = "tbd";
+        public string Nickname { get; private set; } = "tbd";
 
-        protected Animal() {}
-        
+        protected Animal() { }
+
         protected Animal(string species, string id, string age, string physicalDescription, string personalityDescription, string nickname)
         {
             Species = species;
@@ -21,18 +21,18 @@
             Nickname = nickname;
         }
 
-        public void SetAge(string value) => Age = value ?? "?";
+        public void SetAge(string value) => Age = string.IsNullOrEmpty(value) ? "?" : value;
 
         public void SetPhysicalDescription(string value) =>
-            PhysicalDescription = value ?? "tbd";
+            PhysicalDescription = string.IsNullOrEmpty(value) ? "tbd" : value;
 
         public void SetPersonalityDescription(string value) =>
-            PersonalityDescription = value ?? "tbd";
+            PersonalityDescription = string.IsNullOrEmpty(value) ? "tbd" : value;
 
         public void SetNickname(string value) =>
-            Nickname = value ?? "tbd";
+            Nickname = string.IsNullOrEmpty(value) ? "tbd" : value;
 
-        public virtual void DisplayInfo() 
+        public virtual void DisplayInfo()
         {
             Console.WriteLine($"ID: {Id}");
             Console.WriteLine($"Species: {Species}");

@@ -8,6 +8,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<Compile Remove="ContosoPets.UnitTests\**" />
+		<EmbeddedResource Remove="ContosoPets.UnitTests\**" />
+		<None Remove="ContosoPets.UnitTests\**" />
+	</ItemGroup>
+	
+	<ItemGroup>
 		<Folder Include="Resources\" />
 		<Folder Include="Scripts\build\" />
 	</ItemGroup>

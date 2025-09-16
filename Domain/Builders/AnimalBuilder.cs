@@ -1,5 +1,5 @@
-﻿using ContosoPets.Domain.Entities;
-using ContosoPets.Domain.Constants;
+﻿using ContosoPets.Domain.Constants;
+using ContosoPets.Domain.Entities;
 
 namespace ContosoPets.Domain.Builders
 {
@@ -7,10 +7,10 @@ namespace ContosoPets.Domain.Builders
     {
         private string _species = string.Empty;
         private string _id = string.Empty;
-        private string _age = "?";
-        private string _physicalDescription = "tbd";
-        private string _personalityDescription = "tbd";
-        private string _nickname = "tbd";
+        private string _age = AppConstants.UnknownAge;
+        private string _physicalDescription = AppConstants.DefaultValue;
+        private string _personalityDescription = AppConstants.DefaultValue;
+        private string _nickname = AppConstants.DefaultValue;
 
         private AnimalBuilder()
         {
@@ -19,17 +19,17 @@ namespace ContosoPets.Domain.Builders
 
         public static AnimalBuilder Builder()
         {
-          return new AnimalBuilder();
+            return new AnimalBuilder();
         }
 
         private void Reset()
         {
             _species = string.Empty;
             _id = string.Empty;
-            _age = "?";
-            _physicalDescription = "tbd";
-            _personalityDescription = "tbd";
-            _nickname = "tbd";
+            _age = AppConstants.UnknownAge;
+            _physicalDescription = AppConstants.DefaultValue;
+            _personalityDescription = AppConstants.DefaultValue;
+            _nickname = AppConstants.DefaultValue;
         }
 
         public AnimalBuilder WithSpecies(string species)
@@ -69,16 +69,16 @@ namespace ContosoPets.Domain.Builders
         }
 
         public Animal Build()
-        {             
+        {
             if (string.IsNullOrEmpty(_species))
-                throw new InvalidOperationException("Species must be specified.");
+                throw new InvalidOperationException(AppConstants.InvalidSpeciesMessage);
             if (string.IsNullOrEmpty(_id))
-                throw new InvalidOperationException("ID must be specified."); // id générée automatiquement donc pas indispensable
+                throw new InvalidOperationException("ID must be specified."); // ID automatically generated donc pas indispensable
 
             Animal result = _species switch
             {
-                "dog" => new Dog("dog",_id, _age, _physicalDescription, _personalityDescription, _nickname),
-                "cat" => new Cat("cat",_id, _age, _physicalDescription, _personalityDescription, _nickname),
+                "dog" => new Dog("dog", _id, _age, _physicalDescription, _personalityDescription, _nickname),
+                "cat" => new Cat("cat", _id, _age, _physicalDescription, _personalityDescription, _nickname),
                 _ => throw new InvalidOperationException(AppConstants.InvalidSpeciesMessage)
             };
 

@@ -13,7 +13,7 @@ namespace ContosoPets.Infrastructure.Repositories
         private static JsonSerializerOptions SerializerOptions => new()
         {
             WriteIndented = true,
-            Converters = { 
+            Converters = {
                 new JsonStringEnumConverter(),
                 new AnimalJsonConverter()
             },
@@ -46,9 +46,67 @@ namespace ContosoPets.Infrastructure.Repositories
             return _animals;
         }
 
+        public int GetAnimalCount()
+        {
+            return _animals.Count(animal => !string.IsNullOrEmpty(animal.Id));
+        }
+
         public void AddAnimal(Animal animal)
         {
             _animals.Add(animal);
+        }
+
+        public Animal? GetById(string id)
+        {
+            return _animals.FirstOrDefault(a => a.Id == id);
+        }
+
+        public void UpdateAnimal(Animal animal)
+        {
+            var existingIndex = _animals.FindIndex(a => a.Id == animal.Id);
+            if (existingIndex >= 0)
+            {
+                _animals[existingIndex] = animal;
+            }
+        }
+
+        public void DeleteAnimal(Animal animal)
+        {
+            _animals.RemoveAll(a => a.Id == animal.Id);
+        }
+
+        public List<Animal> GetAnimalsWithIncompleteAgeOrDescription()
+        {
+            return _animals
+                .Where(a => !string.IsNullOrEmpty(a.Id) &&
+                            (string.IsNullOrEmpty(a.Age) || a.Age == AppConstants.UnknownAge ||
+                             string.IsNullOrEmpty(a.PhysicalDescription) || a.PhysicalDescription == AppConstants.DefaultValue))
+                .ToList();
+        }
+
+        public List<Animal> GetAnimalsWithIncompleteNicknameOrPersonality()
+        {
+            return _animals
+                .Where(a => !string.IsNullOrEmpty(a.Id) &&
+                            (string.IsNullOrEmpty(a.Nickname) || a.Nickname == AppConstants.DefaultValue ||
+                             string.IsNullOrEmpty(a.PersonalityDescription) || a.PersonalityDescription == AppConstants.DefaultValue))
+                .ToList();
+        }
+
+        public List<Animal> GetAnimalsWithCharacteristic(string species, string characteristic)
+        {
+            if (string.IsNullOrEmpty(species) || string.IsNullOrEmpty(characteristic))
+                return new List<Animal>();
+
+            var lowerSpecies = species.ToLower();
+            var lowerCharacteristic = characteristic.ToLower();
+
+            return _animals
+                .Where(a => a.Species.ToLower() == lowerSpecies
+                && !string.IsNullOrEmpty(a.Id)
+                && (a.PhysicalDescription.ToLower().Contains(lowerCharacteristic) ||
+                    a.PersonalityDescription.ToLower().Contains(lowerCharacteristic)))
+                .ToList();
         }
 
         public void SaveChanges()

@@ -2,6 +2,13 @@
 {
     public abstract class AppConstants
     {
+        // Application limits
+        public const int MaxPets = 8;
+
+        // Default values
+        public const string UnknownAge = "?";
+        public const string DefaultValue = "tbd";
+
         // General messages
         public const string WelcomeMessage = "Welcome to the Contoso PetFriends app. Your main menu options are:";
         public const string InvalidOptionMessage = "Invalid option. Please try again.";

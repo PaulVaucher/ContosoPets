@@ -8,51 +8,64 @@ namespace ContosoPets.Infrastructure.Services
 {
     public class AnimalService(IAnimalRepository repository) : IAnimalService
     {
-        private const int MaxPets = 8;
-        private const string UnknownAge = "?";
-        private const string DefaultValue = "tbd";
+        private static readonly HashSet<string> SupportedSpecies = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "dog",
+            "cat"
+        };
 
         public List<Animal> ListAll()
         {
-            return repository.GetAllAnimals().ToList();
+            return repository.GetAllAnimals() ?? new List<Animal>();
         }
 
-        public AddAnimalResult AddNewAnimal(AddAnimalRequest request)
+        private string? ValidateNewAnimal(AddAnimalRequest request, int petCount)
         {
-            var animals = ListAll();
-            int petCount = animals.Count(animal => !string.IsNullOrEmpty(animal.Id));
-
-            if (petCount >= MaxPets)
+            if (petCount >= AppConstants.MaxPets)
             {
-                return new AddAnimalResult
-                {
-                    Success = false,
-                    ErrorMessage = AppConstants.PetLimitReachedMessage
-                };
+                return AppConstants.PetLimitReachedMessage;
             }
-
-            if (request.Species != "dog" && request.Species != "cat")
+            if (string.IsNullOrWhiteSpace(request.Species) || !SupportedSpecies.Contains(request.Species))
             {
-                return new AddAnimalResult
-                {
-                    Success = false,
-                    ErrorMessage = AppConstants.InvalidSpeciesMessage
-                };
+                return AppConstants.InvalidSpeciesMessage;
             }
+            return null;
+        }
 
-            string id = Animal.GenerateId(request.Species, petCount + 1);
+        private string GenerateId(string species, int nextIndex) =>
+            Animal.GenerateId(species, nextIndex);
 
-            var builder = AnimalBuilder.Builder()
+        private Animal BuildAnimal(AddAnimalRequest request, string id)
+        {
+            return AnimalBuilder.Builder()
                 .WithSpecies(request.Species)
                 .WithId(id)
                 .WithAge(request.Age)
                 .WithPhysicalDescription(request.PhysicalDescription)
                 .WithPersonalityDescription(request.PersonalityDescription)
-                .WithNickname(request.Nickname);
+                .WithNickname(request.Nickname)
+                .Build();
+        }
+
+        public AddAnimalResult AddNewAnimal(AddAnimalRequest request)
+        {
+            int petCount = repository.GetAnimalCount();
+            var validationError = ValidateNewAnimal(request, petCount);
+
+            if (validationError is not null)
+            {
+                return new AddAnimalResult
+                {
+                    Success = false,
+                    ErrorMessage = validationError
+                };
+            }
+
+            string id = GenerateId(request.Species, petCount + 1);
 
             try
             {
-                var newAnimal = builder.Build();
+                var newAnimal = BuildAnimal(request, id);
                 repository.AddAnimal(newAnimal);
                 repository.SaveChanges();
 
@@ -74,29 +87,39 @@ namespace ContosoPets.Infrastructure.Services
 
         public List<Animal> GetAnimalsWithIncompleteAgeOrDescription()
         {
-            return ListAll()
-                .Where(a => !string.IsNullOrEmpty(a.Id) &&
-                            (string.IsNullOrEmpty(a.Age) || a.Age == UnknownAge ||
-                             string.IsNullOrEmpty(a.PhysicalDescription) || a.PhysicalDescription == DefaultValue))
-                .ToList();
+            return repository.GetAnimalsWithIncompleteAgeOrDescription();
         }
 
         public void CompleteAgesAndDescriptions(Dictionary<string, (string Age, string PhysicalDescription)> corrections)
         {
-            var animals = ListAll();
+            var animalIds = corrections.Keys.ToList();
+            var animals = animalIds.Select(id => repository.GetById(id))
+                .Where(animal => animal != null)
+                .Cast<Animal>()
+                .ToList();
+
             bool hasChanges = false;
+
             foreach (var animal in animals)
             {
                 if (corrections.TryGetValue(animal.Id, out var values))
                 {
-                    if (!string.IsNullOrEmpty(values.Age) && values.Age != UnknownAge)
+                    bool animalModified = false;
+
+                    if (!string.IsNullOrEmpty(values.Age) && values.Age != AppConstants.UnknownAge)
                     {
                         animal.SetAge(values.Age);
-                        hasChanges = true;
+                        animalModified = true;
                     }
-                    if (!string.IsNullOrEmpty(values.PhysicalDescription) && values.PhysicalDescription != DefaultValue)
+                    if (!string.IsNullOrEmpty(values.PhysicalDescription) && values.PhysicalDescription != AppConstants.DefaultValue)
                     {
                         animal.SetPhysicalDescription(values.PhysicalDescription);
+                        animalModified = true;
+                    }
+
+                    if (animalModified)
+                    {
+                        repository.UpdateAnimal(animal);
                         hasChanges = true;
                     }
                 }
@@ -109,29 +132,39 @@ namespace ContosoPets.Infrastructure.Services
 
         public List<Animal> GetAnimalsWithIncompleteNicknameOrPersonality()
         {
-            return ListAll()
-                .Where(a => !string.IsNullOrEmpty(a.Id) &&
-                            (string.IsNullOrEmpty(a.Nickname) || a.Nickname == DefaultValue ||
-                             string.IsNullOrEmpty(a.PersonalityDescription) || a.PersonalityDescription == DefaultValue))
-                .ToList();
+            return repository.GetAnimalsWithIncompleteNicknameOrPersonality();
         }
 
         public void CompleteNicknamesAndPersonality(Dictionary<string, (string Nickname, string Personality)> corrections)
         {
-            var animals = ListAll();
+            var animalIds = corrections.Keys.ToList();
+            var animals = animalIds.Select(id => repository.GetById(id))
+                .Where(animal => animal != null)
+                .Cast<Animal>()
+                .ToList();
+
             bool hasChanges = false;
+
             foreach (var animal in animals)
             {
                 if (corrections.TryGetValue(animal.Id, out var values))
                 {
-                    if (!string.IsNullOrEmpty(values.Nickname) && values.Nickname != DefaultValue)
+                    bool animalModified = false;
+
+                    if (!string.IsNullOrEmpty(values.Nickname) && values.Nickname != AppConstants.DefaultValue)
                     {
                         animal.SetNickname(values.Nickname);
-                        hasChanges = true;
+                        animalModified = true;
                     }
-                    if (!string.IsNullOrEmpty(values.Personality) && values.Personality != DefaultValue)
+                    if (!string.IsNullOrEmpty(values.Personality) && values.Personality != AppConstants.DefaultValue)
                     {
                         animal.SetPersonalityDescription(values.Personality);
+                        animalModified = true;
+                    }
+
+                    if (animalModified)
+                    {
+                        repository.UpdateAnimal(animal);
                         hasChanges = true;
                     }
                 }
@@ -144,7 +177,7 @@ namespace ContosoPets.Infrastructure.Services
 
         public Animal? GetAnimalById(string id)
         {
-            return ListAll().FirstOrDefault(a => a.Id == id);
+            return repository.GetById(id);
         }
 
         public bool UpdateAnimalAge(string id, string newAge)
@@ -153,6 +186,7 @@ namespace ContosoPets.Infrastructure.Services
             if (animal != null)
             {
                 animal.SetAge(newAge);
+                repository.UpdateAnimal(animal);
                 repository.SaveChanges();
                 return true;
             }
@@ -165,6 +199,7 @@ namespace ContosoPets.Infrastructure.Services
             if (animal != null)
             {
                 animal.SetPersonalityDescription(newPersonality);
+                repository.UpdateAnimal(animal);
                 repository.SaveChanges();
                 return true;
             }
@@ -173,12 +208,10 @@ namespace ContosoPets.Infrastructure.Services
 
         public List<Animal> GetAnimalsWithCharacteristic(string species, string characteristic)
         {
-            return ListAll()
-                .Where(a => a.Species.Equals(species, StringComparison.OrdinalIgnoreCase)
-                && !string.IsNullOrEmpty(a.Id)
-                && (a.PhysicalDescription.Contains(characteristic, StringComparison.OrdinalIgnoreCase) ||
-                             a.PersonalityDescription.Contains(characteristic, StringComparison.OrdinalIgnoreCase)))
-                .ToList();
+            if (string.IsNullOrEmpty(species) || string.IsNullOrEmpty(characteristic))
+                return [];
+
+            return repository.GetAnimalsWithCharacteristic(species, characteristic);
         }
     }
 }
