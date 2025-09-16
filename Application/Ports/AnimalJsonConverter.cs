@@ -11,12 +11,12 @@ namespace ContosoPets.Application.Ports
             using JsonDocument doc = JsonDocument.ParseValue(ref reader);
             var root = doc.RootElement;
 
-                // Lire la propriété Species pour déterminer le type
+                // Read the Species property to determine the type
                 if (root.TryGetProperty("Species", out var speciesProperty))
                 {
                     string species = speciesProperty.GetString()?.ToLower() ?? "";
 
-                    // Créer les options sans ce convertisseur pour éviter la récursion
+                    // Create options without this converter to avoid recursion
                     var newOptions = new JsonSerializerOptions(options);
                     newOptions.Converters.Clear();
                     foreach (var converter in options.Converters)
@@ -27,7 +27,7 @@ namespace ContosoPets.Application.Ports
                         }
                     }
 
-                    // Désérialiser vers le type approprié
+                    // Deserialize to the appropriate type
                     string json = root.GetRawText();
                     return species switch
                     {
@@ -43,7 +43,7 @@ namespace ContosoPets.Application.Ports
 
         public override void Write(Utf8JsonWriter writer, Animal value, JsonSerializerOptions options)
         {
-            // Créer les options sans ce convertisseur pour éviter la récursion
+            // Create options without this converter to avoid recursion
             var newOptions = new JsonSerializerOptions(options);
             newOptions.Converters.Clear();
             foreach (var converter in options.Converters)
@@ -54,7 +54,7 @@ namespace ContosoPets.Application.Ports
                 }
             }
 
-            // Sérialiser normalement
+            // Serialize normally
             JsonSerializer.Serialize(writer, value, value.GetType(), newOptions);
         }
     }

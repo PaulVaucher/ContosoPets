@@ -73,7 +73,7 @@ namespace ContosoPets.Domain.Builders
             if (string.IsNullOrEmpty(_species))
                 throw new InvalidOperationException(AppConstants.InvalidSpeciesMessage);
             if (string.IsNullOrEmpty(_id))
-                throw new InvalidOperationException("ID must be specified."); // ID automatically generated donc pas indispensable
+                throw new InvalidOperationException(AppConstants.IdMustBeSpecifiedMessage); // ID automatically generated donc pas indispensable
 
             Animal result = _species switch
             {

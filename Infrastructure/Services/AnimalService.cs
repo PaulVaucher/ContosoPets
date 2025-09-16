@@ -106,12 +106,12 @@ namespace ContosoPets.Infrastructure.Services
                 {
                     bool animalModified = false;
 
-                    if (!string.IsNullOrEmpty(values.Age) && values.Age != AppConstants.UnknownAge)
+                    if (!string.IsNullOrEmpty(values.Age))
                     {
                         animal.SetAge(values.Age);
                         animalModified = true;
                     }
-                    if (!string.IsNullOrEmpty(values.PhysicalDescription) && values.PhysicalDescription != AppConstants.DefaultValue)
+                    if (!string.IsNullOrEmpty(values.PhysicalDescription))
                     {
                         animal.SetPhysicalDescription(values.PhysicalDescription);
                         animalModified = true;
@@ -151,12 +151,12 @@ namespace ContosoPets.Infrastructure.Services
                 {
                     bool animalModified = false;
 
-                    if (!string.IsNullOrEmpty(values.Nickname) && values.Nickname != AppConstants.DefaultValue)
+                    if (!string.IsNullOrEmpty(values.Nickname))
                     {
                         animal.SetNickname(values.Nickname);
                         animalModified = true;
                     }
-                    if (!string.IsNullOrEmpty(values.Personality) && values.Personality != AppConstants.DefaultValue)
+                    if (!string.IsNullOrEmpty(values.Personality))
                     {
                         animal.SetPersonalityDescription(values.Personality);
                         animalModified = true;

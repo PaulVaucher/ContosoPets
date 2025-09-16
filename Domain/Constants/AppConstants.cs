@@ -9,6 +9,13 @@
         public const string UnknownAge = "?";
         public const string DefaultValue = "tbd";
 
+        // User input values
+        public const string YesInput = "y";
+        public const string NoInput = "n";
+
+        // Error messages - Builder
+        public const string IdMustBeSpecifiedMessage = "ID must be specified.";
+
         // General messages
         public const string WelcomeMessage = "Welcome to the Contoso PetFriends app. Your main menu options are:";
         public const string InvalidOptionMessage = "Invalid option. Please try again.";

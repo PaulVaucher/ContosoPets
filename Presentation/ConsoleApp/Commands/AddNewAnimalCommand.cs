@@ -12,20 +12,18 @@ namespace ContosoPets.Presentation.ConsoleApp.Commands
         {
             var animals = _service.ListAll();
             int petCount = animals.Count(a => !string.IsNullOrEmpty(a.Id));
-            const int MaxPets = 8;
-            const string CanYes = "y";
-            const string CanNo = "n";
+            
 
-            if (petCount >= MaxPets)
+            if (petCount >= AppConstants.MaxPets)
             {
                 Console.WriteLine(AppConstants.PetLimitReachedMessage);
                 return;
             }
             
-            Console.WriteLine(string.Format(AppConstants.CurrentPetsStatusFormat, petCount, MaxPets - petCount));
-            string anotherPet = CanYes;
+            Console.WriteLine(string.Format(AppConstants.CurrentPetsStatusFormat, petCount, AppConstants.MaxPets - petCount));
+            string anotherPet = AppConstants.YesInput;
 
-            while (anotherPet == CanYes && petCount < MaxPets)
+            while (anotherPet == AppConstants.YesInput && petCount < AppConstants.MaxPets)
             {
                 Console.WriteLine(AppConstants.EnterSpeciesPrompt);
                 var species = Console.ReadLine() ?? string.Empty;
@@ -66,10 +64,10 @@ namespace ContosoPets.Presentation.ConsoleApp.Commands
                     Console.WriteLine($"Failed to add new animal: {result.ErrorMessage}");
                 }
 
-                if (petCount < MaxPets)
+                if (petCount < AppConstants.MaxPets)
                 {
                     Console.WriteLine(AppConstants.AddAnotherPetPrompt);
-                    anotherPet = Console.ReadLine()?.ToLower() == CanYes ? CanYes : CanNo;
+                    anotherPet = Console.ReadLine()?.ToLower() == AppConstants.YesInput ? AppConstants.YesInput : AppConstants.NoInput;
                 }
                 else
                 {

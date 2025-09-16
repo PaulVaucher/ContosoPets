@@ -1,0 +1,7 @@
+﻿[*.cs]
+
+# S2325: Methods and properties that don't access instance data should be static
+dotnet_diagnostic.S2325.severity = suggestion
+
+# CA1822: Marquer les membres comme étant static
+dotnet_diagnostic.CA1822.severity = suggestion

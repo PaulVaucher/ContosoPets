@@ -7,7 +7,7 @@ namespace ContosoPets.Infrastructure.DI
     public static class ServiceCollectionExtensions
     {
         /// <summary>
-        /// Configure tous les services de l'infrastructure
+        /// Configures all infrastructure services
         /// </summary>
         public static IServiceCollection AddInfrastructure(this IServiceCollection services)
         {
@@ -16,7 +16,7 @@ namespace ContosoPets.Infrastructure.DI
         }
 
         /// <summary>
-        /// Scan l'assembly donné et enregistre automatiquement tous les services
+        /// Scans the given assembly and automatically registers all services
         /// </summary>
         public static IServiceCollection AddInjectablesFromAssembly(this IServiceCollection services, Assembly assembly)
         {
