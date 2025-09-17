@@ -1,4 +1,5 @@
 ﻿using ContosoPets.Application.UseCases.Animals;
+using ContosoPets.Application.Ports;
 using ContosoPets.Domain.Constants;
 
 namespace ContosoPets.Presentation.ConsoleApp.Commands
@@ -6,10 +7,12 @@ namespace ContosoPets.Presentation.ConsoleApp.Commands
     public class EnsureAgesDescriptionsCommand : IMenuCommand
     {
         private readonly IAnimalService _service;
+        private readonly ILinePrinter _output;
 
-        public EnsureAgesDescriptionsCommand(IAnimalService service)
+        public EnsureAgesDescriptionsCommand(IAnimalService service, ILinePrinter output)
         {
             _service = service;
+            _output = output;
         }
 
         public void Execute()
@@ -17,7 +20,7 @@ namespace ContosoPets.Presentation.ConsoleApp.Commands
             var incompleteAnimals = _service.GetAnimalsWithIncompleteAgeOrDescription();
             if (incompleteAnimals.Count == 0)
             {
-                Console.WriteLine(AppConstants.NoAnimalsFoundMessage);
+                _output.PrintLine(AppConstants.NoAnimalsFoundMessage);
                 return;
             }
 
@@ -26,21 +29,21 @@ namespace ContosoPets.Presentation.ConsoleApp.Commands
             {
                 if (string.IsNullOrEmpty(animal.Age) || animal.Age == "?")
                 {
-                    Console.WriteLine(string.Format(AppConstants.AgePromptComplete, animal.Id, animal.Species));
-                    var age = Console.ReadLine() ?? string.Empty;
+                    _output.PrintLine(string.Format(AppConstants.AgePromptComplete, animal.Id, animal.Species));
+                    var age = _output.ReadLine() ?? string.Empty;
                     corrections[animal.Id] = (age, corrections.ContainsKey(animal.Id) ? corrections[animal.Id].PhysicalDescription : animal.PhysicalDescription);
 
                 }
                 if (string.IsNullOrEmpty(animal.PhysicalDescription) || animal.PhysicalDescription == "tbd")
                 {
-                    Console.WriteLine(string.Format(AppConstants.PhysicalDescriptionPromptComplete, animal.Id, animal.PhysicalDescription));
-                    var physical = Console.ReadLine() ?? string.Empty;
+                    _output.PrintLine(string.Format(AppConstants.PhysicalDescriptionPromptComplete, animal.Id, animal.PhysicalDescription));
+                    var physical = _output.ReadLine() ?? string.Empty;
                     var age = corrections.ContainsKey(animal.Id) ? corrections[animal.Id].Age : animal.Age;
                     corrections[animal.Id] = (age, physical);
                 }
             }
             _service.CompleteAgesAndDescriptions(corrections);
-            Console.WriteLine(AppConstants.AgeAndDescriptionCompleteMessage);
+            _output.PrintLine(AppConstants.AgeAndDescriptionCompleteMessage);
         }
     }    
 }

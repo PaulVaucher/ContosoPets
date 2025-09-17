@@ -1,4 +1,6 @@
-﻿namespace ContosoPets.Domain.Entities
+﻿using ContosoPets.Application.Ports;
+
+namespace ContosoPets.Domain.Entities
 {
     public abstract class Animal
     {
@@ -32,14 +34,14 @@
         public void SetNickname(string value) =>
             Nickname = string.IsNullOrEmpty(value) ? "tbd" : value;
 
-        public virtual void DisplayInfo()
+        public virtual void DisplayInfo(ILinePrinter output)
         {
-            Console.WriteLine($"ID: {Id}");
-            Console.WriteLine($"Species: {Species}");
-            Console.WriteLine($"Age: {(string.IsNullOrEmpty(Age) ? "?" : Age)}");
-            Console.WriteLine($"Physical Description: {PhysicalDescription}");
-            Console.WriteLine($"Personality Description: {PersonalityDescription}");
-            Console.WriteLine($"Nickname: {Nickname}");
+            output.PrintLine($"ID: {Id}");
+            output.PrintLine($"Species: {Species}");
+            output.PrintLine($"Age: {(string.IsNullOrEmpty(Age) ? "?" : Age)}");
+            output.PrintLine($"Physical Description: {PhysicalDescription}");
+            output.PrintLine($"Personality Description: {PersonalityDescription}");
+            output.PrintLine($"Nickname: {Nickname}");
         }
 
         public static string GenerateId(string species, int index)

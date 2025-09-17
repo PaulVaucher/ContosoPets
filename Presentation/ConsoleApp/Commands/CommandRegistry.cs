@@ -1,4 +1,5 @@
-﻿using ContosoPets.Application.UseCases.Animals;
+﻿using ContosoPets.Application.Ports;
+using ContosoPets.Application.UseCases.Animals;
 
 namespace ContosoPets.Presentation.ConsoleApp.Commands
 {
@@ -7,19 +8,19 @@ namespace ContosoPets.Presentation.ConsoleApp.Commands
     public static class CommandRegistry
     {
         public static (List<MenuCommandEntry> OrderedList, Dictionary<MenuOptionEnum, IMenuCommand> Lookup)
-        BuildCommandRegistry(IAnimalService service, Action exitCallback)        
+        BuildCommandRegistry(IAnimalService service, ILinePrinter output, Action exitCallback)        
         {
             var list = new List<MenuCommandEntry>
             {
-                new(MenuOptionEnum.MenuListAllAnimals, new ListAllAnimalsCommand(service)),
-                new(MenuOptionEnum.MenuAddNewAnimal, new AddNewAnimalCommand(service)),
-                new(MenuOptionEnum.MenuEnsureAgesAndDescriptionsComplete, new EnsureAgesDescriptionsCommand(service)),
-                new(MenuOptionEnum.MenuEnsureNicknamesAndPersonalityComplete, new EnsureNicknamesPersonalityCommand(service)),
-                new(MenuOptionEnum.MenuEditAnimalAge, new EditAnimalAgeCommand(service)),
-                new(MenuOptionEnum.MenuEditAnimalPersonality, new EditAnimalPersonalityCommand(service)),
-                new(MenuOptionEnum.MenuDisplayCatsWithCharacteristic, new DisplayCatsWithCharacteristicCommand(service)),
-                new(MenuOptionEnum.MenuDisplayDogsWithCharacteristic, new DisplayDogsWithCharacteristicCommand(service)),
-                new(MenuOptionEnum.MenuExit, new ExitCommand(exitCallback))
+                new(MenuOptionEnum.MenuListAllAnimals, new ListAllAnimalsCommand(service, output)),
+                new(MenuOptionEnum.MenuAddNewAnimal, new AddNewAnimalCommand(service, output)),
+                new(MenuOptionEnum.MenuEnsureAgesAndDescriptionsComplete, new EnsureAgesDescriptionsCommand(service, output)),
+                new(MenuOptionEnum.MenuEnsureNicknamesAndPersonalityComplete, new EnsureNicknamesPersonalityCommand(service, output)),
+                new(MenuOptionEnum.MenuEditAnimalAge, new EditAnimalAgeCommand(service, output)),
+                new(MenuOptionEnum.MenuEditAnimalPersonality, new EditAnimalPersonalityCommand(service, output)),
+                new(MenuOptionEnum.MenuDisplayCatsWithCharacteristic, new DisplayCatsWithCharacteristicCommand(service, output)),
+                new(MenuOptionEnum.MenuDisplayDogsWithCharacteristic, new DisplayDogsWithCharacteristicCommand(service, output)),
+                new(MenuOptionEnum.MenuExit, new ExitCommand(output, exitCallback))
             };
 
             var dict = list.ToDictionary(x => x.Option, x => x.Command);

@@ -1,4 +1,5 @@
-﻿using ContosoPets.Application.UseCases.Animals;
+﻿using ContosoPets.Application.Ports;
+using ContosoPets.Application.UseCases.Animals;
 using ContosoPets.Domain.Constants;
 using ContosoPets.Infrastructure.DI;
 using ContosoPets.Presentation.ConsoleApp.Commands;
@@ -15,7 +16,10 @@ namespace ContosoPets.Presentation.ConsoleApp
                 var serviceProvider = ConfigureServices();
                 using (serviceProvider)
                 {
-                    RunApplication(serviceProvider);
+                    var animalService = serviceProvider.GetRequiredService<IAnimalService>();
+                    var output = serviceProvider.GetRequiredService<ILinePrinter>();
+
+                    RunApplication(animalService, output);
                 }
             }
             catch (Exception ex)
@@ -41,87 +45,86 @@ namespace ContosoPets.Presentation.ConsoleApp
             }
         }
 
-        private static void RunApplication(ServiceProvider serviceProvider)
+        private static void RunApplication(IAnimalService animalService, ILinePrinter output)
         {
             try
-            {
-                var animalService = serviceProvider.GetRequiredService<IAnimalService>();
-                RunInteractiveMenu(animalService);
+            {                
+                RunInteractiveMenu(animalService, output);
             }
             catch (InvalidOperationException ex)
             {
-                Console.WriteLine(string.Format(AppConstants.ServiceConfigurationErrorFormat, ex.Message));
+                output.PrintLine(string.Format(AppConstants.ServiceConfigurationErrorFormat, ex.Message));
                 throw;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(string.Format(AppConstants.UnexpectedErrorFormat, ex.Message));
+                output.PrintLine(string.Format(AppConstants.UnexpectedErrorFormat, ex.Message));
                 throw;
             }
         }
 
-        private static void RunInteractiveMenu(IAnimalService service)
+        private static void RunInteractiveMenu(IAnimalService service, ILinePrinter output)
         {
-            Console.WriteLine(AppConstants.WelcomeMessage);
+            output.PrintLine(AppConstants.WelcomeMessage);
 
             bool exit = false;
             void ExitApp() => exit = true;
 
-            var (orderedMenu, commandMap) = CommandRegistry.BuildCommandRegistry(service, ExitApp);
+            var (orderedMenu, commandMap) = CommandRegistry.BuildCommandRegistry(service, output, ExitApp);
 
             while (!exit)
             {
                 try
                 {
-                    DisplayMenu(orderedMenu);
-                    ProcessUserInput(commandMap);
+                    DisplayMenu(orderedMenu, output);
+                    ProcessUserInput(commandMap, output);
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(string.Format(AppConstants.MenuExecutionErrorFormat, ex.Message));
-                    Console.WriteLine(AppConstants.ContinuePrompt);
-                    Console.ReadKey();
-                    Console.Clear();
+                    output.PrintLine(string.Format(AppConstants.MenuExecutionErrorFormat, ex.Message));
+                    output.PrintLine(AppConstants.ContinuePrompt);
+                    output.ReadKey();
+                    output.Clear();
                 }
             }
         }
 
-        private static void DisplayMenu(List<MenuCommandEntry> orderedMenu)
+        private static void DisplayMenu(List<MenuCommandEntry> orderedMenu, ILinePrinter output)
         {
-            Console.WriteLine();
+            output.PrintLine();
             foreach (var entry in orderedMenu)
             {
-                Console.WriteLine(entry.Option.ToLabel());
+                output.PrintLine(entry.Option.ToLabel());
             }
-            Console.Write(AppConstants.MenuPrompt);
+            output.Write(AppConstants.MenuPrompt);
         }
 
-        private static void ProcessUserInput(Dictionary<MenuOptionEnum, IMenuCommand> commandMap)
+        private static void ProcessUserInput(Dictionary<MenuOptionEnum, IMenuCommand> commandMap, ILinePrinter output)
         {
-            var input = Console.ReadLine();
+            var input = output.ReadLine();
 
             if (int.TryParse(input, out int menuChoice) &&
                 Enum.IsDefined(typeof(MenuOptionEnum), menuChoice))
             {
                 var selected = (MenuOptionEnum)menuChoice;
-                Console.WriteLine();
+                output.PrintLine();
 
                 if (commandMap.TryGetValue(selected, out var command))
                 {
-                    ExecuteCommand(command);
+                    ExecuteCommand(command, output);
                 }
                 else
                 {
-                    Console.WriteLine(AppConstants.InvalidOptionMessage);
+                    output.PrintLine(AppConstants.InvalidOptionMessage);
                 }
             }
             else
             {
-                Console.WriteLine(AppConstants.InvalidOptionMessage);
+                output.PrintLine(AppConstants.InvalidOptionMessage);
             }
         }
 
-        private static void ExecuteCommand(IMenuCommand command)
+        private static void ExecuteCommand(IMenuCommand command, ILinePrinter output)
         {
             try
             {
@@ -129,9 +132,9 @@ namespace ContosoPets.Presentation.ConsoleApp
             }
             catch (Exception ex)
             {
-                Console.WriteLine(string.Format(AppConstants.MenuExecutionErrorFormat, ex.Message));
-                Console.WriteLine(AppConstants.ContinuePrompt);
-                Console.ReadKey();
+                output.PrintLine(string.Format(AppConstants.MenuExecutionErrorFormat, ex.Message));
+                output.PrintLine(AppConstants.ContinuePrompt);
+                output.ReadKey();
             }
         }
     }

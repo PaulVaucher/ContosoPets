@@ -123,7 +123,7 @@ namespace ContosoPets.Infrastructure.Repositories
             }
             catch (Exception ex)
             {
-                Console.WriteLine(string.Format(AppConstants.AnimalOperationErrorFormat, ex.Message));
+                throw new InvalidOperationException(string.Format(AppConstants.AnimalOperationErrorFormat, ex.Message));
             }
         }
     }

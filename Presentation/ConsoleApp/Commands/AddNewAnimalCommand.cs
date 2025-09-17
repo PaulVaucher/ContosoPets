@@ -1,12 +1,20 @@
 ﻿using ContosoPets.Application.UseCases.Animals;
+using ContosoPets.Application.Ports;
 using ContosoPets.Domain.Constants;
 using ContosoPets.Domain.Entities;
 
 namespace ContosoPets.Presentation.ConsoleApp.Commands
 {
-    public class AddNewAnimalCommand(IAnimalService service) : IMenuCommand
+    public class AddNewAnimalCommand : IMenuCommand
     {
-        private readonly IAnimalService _service = service;
+        private readonly IAnimalService _service;
+        private readonly ILinePrinter _output;
+
+        public AddNewAnimalCommand(IAnimalService service, ILinePrinter output)
+        {
+            _service = service;
+            _output = output;
+        }
 
         public void Execute()
         {
@@ -16,30 +24,30 @@ namespace ContosoPets.Presentation.ConsoleApp.Commands
 
             if (petCount >= AppConstants.MaxPets)
             {
-                Console.WriteLine(AppConstants.PetLimitReachedMessage);
+                _output.PrintLine(AppConstants.PetLimitReachedMessage);
                 return;
             }
             
-            Console.WriteLine(string.Format(AppConstants.CurrentPetsStatusFormat, petCount, AppConstants.MaxPets - petCount));
+            _output.PrintLine(string.Format(AppConstants.CurrentPetsStatusFormat, petCount, AppConstants.MaxPets - petCount));
             string anotherPet = AppConstants.YesInput;
 
             while (anotherPet == AppConstants.YesInput && petCount < AppConstants.MaxPets)
             {
-                Console.WriteLine(AppConstants.EnterSpeciesPrompt);
+                _output.PrintLine(AppConstants.EnterSpeciesPrompt);
                 var species = Console.ReadLine() ?? string.Empty;
 
                 var id = Animal.GenerateId(species, petCount + 1);
 
-                Console.WriteLine(string.Format(AppConstants.AgePromptFormat, id));
+                _output.PrintLine(string.Format(AppConstants.AgePromptFormat, id));
                 var age = Console.ReadLine();
 
-                Console.WriteLine(string.Format(AppConstants.PhysicalDescriptionPromptFormat, id));
+                _output.PrintLine(string.Format(AppConstants.PhysicalDescriptionPromptFormat, id));
                 var physical = Console.ReadLine();
 
-                Console.WriteLine(string.Format(AppConstants.PersonalityDescriptionPromptFormat, id));
+                _output.PrintLine(string.Format(AppConstants.PersonalityDescriptionPromptFormat, id));
                 var personality = Console.ReadLine();
 
-                Console.WriteLine(string.Format(AppConstants.NicknamePromptFormat, id));
+                _output.PrintLine(string.Format(AppConstants.NicknamePromptFormat, id));
                 var nickname = Console.ReadLine();
 
                 var request = new AddAnimalRequest
@@ -55,23 +63,23 @@ namespace ContosoPets.Presentation.ConsoleApp.Commands
 
                 if (result.Success)
                 {
-                    Console.WriteLine($"Successfully added new {species} with ID: {result.Animal?.Id}");
+                    _output.PrintLine($"Successfully added new {species} with ID: {result.Animal?.Id}");
                     petCount++;
 
                 }
                 else
                 {
-                    Console.WriteLine($"Failed to add new animal: {result.ErrorMessage}");
+                    _output.PrintLine($"Failed to add new animal: {result.ErrorMessage}");
                 }
 
                 if (petCount < AppConstants.MaxPets)
                 {
-                    Console.WriteLine(AppConstants.AddAnotherPetPrompt);
+                    _output.PrintLine(AppConstants.AddAnotherPetPrompt);
                     anotherPet = Console.ReadLine()?.ToLower() == AppConstants.YesInput ? AppConstants.YesInput : AppConstants.NoInput;
                 }
                 else
                 {
-                    Console.WriteLine(AppConstants.PetLimitReachedMessage);
+                    _output.PrintLine(AppConstants.PetLimitReachedMessage);
                 }
             }
         }
