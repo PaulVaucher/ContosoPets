@@ -1,5 +1,5 @@
 ﻿using ContosoPets.Application.Ports;
-using ContosoPets.Application.UseCases.Animals;
+using ContosoPets.Application.Services;
 
 namespace ContosoPets.Presentation.ConsoleApp.Commands
 {
@@ -8,7 +8,7 @@ namespace ContosoPets.Presentation.ConsoleApp.Commands
     public static class CommandRegistry
     {
         public static (List<MenuCommandEntry> OrderedList, Dictionary<MenuOptionEnum, IMenuCommand> Lookup)
-        BuildCommandRegistry(IAnimalService service, ILinePrinter output, Action exitCallback)        
+        BuildCommandRegistry(IAnimalApplicationService service, ILinePrinter output, Action exitCallback)        
         {
             var list = new List<MenuCommandEntry>
             {

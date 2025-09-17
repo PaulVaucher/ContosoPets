@@ -1,56 +1,32 @@
-﻿using ContosoPets.Application.UseCases.Animals;
-using ContosoPets.Domain.Entities;
-using ContosoPets.Application.Ports;
+﻿using ContosoPets.Application.Ports;
+using ContosoPets.Application.Services;
+using ContosoPets.Application.UseCases.Animals;
 using ContosoPets.Domain.Constants;
-using ContosoPets.Domain.Builders;
+using ContosoPets.Domain.Entities;
+using ContosoPets.Domain.Services;
 
-namespace ContosoPets.Infrastructure.Services
+namespace ContosoPets.Application.Services
 {
-    public class AnimalService(IAnimalRepository repository) : IAnimalService
+    public class AnimalApplicationService : IAnimalApplicationService
     {
-        private static readonly HashSet<string> SupportedSpecies = new(StringComparer.OrdinalIgnoreCase)
+        private readonly IAnimalRepository _repository;
+        private readonly IAnimalDomainService _domainService;
+
+        public AnimalApplicationService(IAnimalRepository repository, IAnimalDomainService domainService)
         {
-            "dog",
-            "cat"
-        };
+            _repository = repository;
+            _domainService = domainService;
+        }
 
         public List<Animal> ListAll()
         {
-            return repository.GetAllAnimals() ?? new List<Animal>();
-        }
-
-        private string? ValidateNewAnimal(AddAnimalRequest request, int petCount)
-        {
-            if (petCount >= AppConstants.MaxPets)
-            {
-                return AppConstants.PetLimitReachedMessage;
-            }
-            if (string.IsNullOrWhiteSpace(request.Species) || !SupportedSpecies.Contains(request.Species))
-            {
-                return AppConstants.InvalidSpeciesMessage;
-            }
-            return null;
-        }
-
-        private string GenerateId(string species, int nextIndex) =>
-            Animal.GenerateId(species, nextIndex);
-
-        private Animal BuildAnimal(AddAnimalRequest request, string id)
-        {
-            return AnimalBuilder.Builder()
-                .WithSpecies(request.Species)
-                .WithId(id)
-                .WithAge(request.Age)
-                .WithPhysicalDescription(request.PhysicalDescription)
-                .WithPersonalityDescription(request.PersonalityDescription)
-                .WithNickname(request.Nickname)
-                .Build();
+            return _repository.GetAllAnimals() ?? new List<Animal>();
         }
 
         public AddAnimalResult AddNewAnimal(AddAnimalRequest request)
         {
-            int petCount = repository.GetAnimalCount();
-            var validationError = ValidateNewAnimal(request, petCount);
+            int petCount = _repository.GetAnimalCount();
+            var validationError = _domainService.ValidateNewAnimal(request.Species, petCount);
 
             if (validationError is not null)
             {
@@ -61,13 +37,20 @@ namespace ContosoPets.Infrastructure.Services
                 };
             }
 
-            string id = GenerateId(request.Species, petCount + 1);
+            string id = _domainService.GenerateId(request.Species, petCount + 1);
 
             try
             {
-                var newAnimal = BuildAnimal(request, id);
-                repository.AddAnimal(newAnimal);
-                repository.SaveChanges();
+                var newAnimal = _domainService.BuildAnimal(
+                    request.Species,
+                    id,
+                    request.Age,
+                    request.PhysicalDescription,
+                    request.PersonalityDescription,
+                    request.Nickname);
+
+                _repository.AddAnimal(newAnimal);
+                _repository.SaveChanges();
 
                 return new AddAnimalResult
                 {
@@ -87,13 +70,13 @@ namespace ContosoPets.Infrastructure.Services
 
         public List<Animal> GetAnimalsWithIncompleteAgeOrDescription()
         {
-            return repository.GetAnimalsWithIncompleteAgeOrDescription();
+            return _repository.GetAnimalsWithIncompleteAgeOrDescription();
         }
 
         public void CompleteAgesAndDescriptions(Dictionary<string, (string Age, string PhysicalDescription)> corrections)
         {
             var animalIds = corrections.Keys.ToList();
-            var animals = animalIds.Select(id => repository.GetById(id))
+            var animals = animalIds.Select(id => _repository.GetById(id))
                 .Where(animal => animal != null)
                 .Cast<Animal>()
                 .ToList();
@@ -119,26 +102,26 @@ namespace ContosoPets.Infrastructure.Services
 
                     if (animalModified)
                     {
-                        repository.UpdateAnimal(animal);
+                        _repository.UpdateAnimal(animal);
                         hasChanges = true;
                     }
                 }
             }
             if (hasChanges)
             {
-                repository.SaveChanges();
+                _repository.SaveChanges();
             }
         }
 
         public List<Animal> GetAnimalsWithIncompleteNicknameOrPersonality()
         {
-            return repository.GetAnimalsWithIncompleteNicknameOrPersonality();
+            return _repository.GetAnimalsWithIncompleteNicknameOrPersonality();
         }
 
         public void CompleteNicknamesAndPersonality(Dictionary<string, (string Nickname, string Personality)> corrections)
         {
             var animalIds = corrections.Keys.ToList();
-            var animals = animalIds.Select(id => repository.GetById(id))
+            var animals = animalIds.Select(id => _repository.GetById(id))
                 .Where(animal => animal != null)
                 .Cast<Animal>()
                 .ToList();
@@ -150,7 +133,6 @@ namespace ContosoPets.Infrastructure.Services
                 if (corrections.TryGetValue(animal.Id, out var values))
                 {
                     bool animalModified = false;
-
                     if (!string.IsNullOrEmpty(values.Nickname))
                     {
                         animal.SetNickname(values.Nickname);
@@ -161,23 +143,22 @@ namespace ContosoPets.Infrastructure.Services
                         animal.SetPersonalityDescription(values.Personality);
                         animalModified = true;
                     }
-
                     if (animalModified)
                     {
-                        repository.UpdateAnimal(animal);
+                        _repository.UpdateAnimal(animal);
                         hasChanges = true;
                     }
                 }
             }
             if (hasChanges)
             {
-                repository.SaveChanges();
+                _repository.SaveChanges();
             }
         }
 
         public Animal? GetAnimalById(string id)
         {
-            return repository.GetById(id);
+            return _repository.GetById(id);
         }
 
         public bool UpdateAnimalAge(string id, string newAge)
@@ -186,8 +167,8 @@ namespace ContosoPets.Infrastructure.Services
             if (animal != null)
             {
                 animal.SetAge(newAge);
-                repository.UpdateAnimal(animal);
-                repository.SaveChanges();
+                _repository.UpdateAnimal(animal);
+                _repository.SaveChanges();
                 return true;
             }
             return false;
@@ -199,8 +180,8 @@ namespace ContosoPets.Infrastructure.Services
             if (animal != null)
             {
                 animal.SetPersonalityDescription(newPersonality);
-                repository.UpdateAnimal(animal);
-                repository.SaveChanges();
+                _repository.UpdateAnimal(animal);
+                _repository.SaveChanges();
                 return true;
             }
             return false;
@@ -211,7 +192,7 @@ namespace ContosoPets.Infrastructure.Services
             if (string.IsNullOrEmpty(species) || string.IsNullOrEmpty(characteristic))
                 return [];
 
-            return repository.GetAnimalsWithCharacteristic(species, characteristic);
+            return _repository.GetAnimalsWithCharacteristic(species, characteristic);
         }
     }
 }

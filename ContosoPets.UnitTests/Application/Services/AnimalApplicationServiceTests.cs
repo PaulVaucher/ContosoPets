@@ -1,22 +1,25 @@
 ﻿using ContosoPets.Application.Ports;
+using ContosoPets.Application.Services;
 using ContosoPets.Application.UseCases.Animals;
 using ContosoPets.Domain.Entities;
-using ContosoPets.Infrastructure.Services;
+using ContosoPets.Domain.Services;
 using FluentAssertions;
 using Moq;
 using Xunit;
 
 namespace ContosoPets.UnitTests.Application.Services
 {
-    public class AnimalServiceTests
+    public class AnimalApplicationServiceTests
     {
         private readonly Mock<IAnimalRepository> _mockRepository;
-        private readonly AnimalService _animalService;
+        private readonly Mock<IAnimalDomainService> _mockDomainService;
+        private readonly AnimalApplicationService _animalService;
 
-        public AnimalServiceTests()
+        public AnimalApplicationServiceTests()
         {
             _mockRepository = new Mock<IAnimalRepository>();
-            _animalService = new AnimalService(_mockRepository.Object);
+            _mockDomainService = new Mock<IAnimalDomainService>();
+            _animalService = new AnimalApplicationService(_mockRepository.Object, _mockDomainService.Object);
         }
 
         [Fact]
@@ -24,6 +27,8 @@ namespace ContosoPets.UnitTests.Application.Services
         {
             // Arrange
             _mockRepository.Setup(r => r.GetAnimalCount()).Returns(8);
+            _mockDomainService.Setup(d => d.ValidateNewAnimal("dog", 8))
+                .Returns("We have reached our limit on the number of pets that we can manage.");
 
             var request = new AddAnimalRequest
             {
@@ -47,7 +52,13 @@ namespace ContosoPets.UnitTests.Application.Services
         public void AddNewAnimal_WithValidRequest_ShouldReturnSuccess()
         {
             // Arrange
+            var expectedAnimal = new Dog("dog", "d1", "2 years", "Golden fur", "Friendly", "Rex");
+
             _mockRepository.Setup(r => r.GetAnimalCount()).Returns(0);
+            _mockDomainService.Setup(d => d.ValidateNewAnimal("dog", 0)).Returns((string?)null);
+            _mockDomainService.Setup(d => d.GenerateId("dog", 1)).Returns("d1");
+            _mockDomainService.Setup(d => d.BuildAnimal("dog", "d1", "2 years", "Golden fur", "Friendly", "Rex"))
+                .Returns(expectedAnimal);
 
             var request = new AddAnimalRequest
             {
@@ -66,7 +77,7 @@ namespace ContosoPets.UnitTests.Application.Services
             result.Animal.Should().NotBeNull();
             result.Animal!.Species.Should().Be("dog");
 
-            _mockRepository.Verify(r => r.AddAnimal(It.IsAny<Animal>()), Times.Once);
+            _mockRepository.Verify(r => r.AddAnimal(expectedAnimal), Times.Once);
             _mockRepository.Verify(r => r.SaveChanges(), Times.Once);
         }
 
@@ -74,10 +85,12 @@ namespace ContosoPets.UnitTests.Application.Services
         [InlineData("")]
         [InlineData("bird")]
         [InlineData("invalid")]
-        public void AddNewAnimal_WhitInvalidSpecies_ShouldReturnFailure(string invalidSpecies)
+        public void AddNewAnimal_WithInvalidSpecies_ShouldReturnFailure(string invalidSpecies)
         {
             // Arrange
             _mockRepository.Setup(r => r.GetAnimalCount()).Returns(0);
+            _mockDomainService.Setup(d => d.ValidateNewAnimal(invalidSpecies, 0))
+                .Returns("Invalid input. Please enter 'dog' or 'cat'.");
 
             var request = new AddAnimalRequest
             {

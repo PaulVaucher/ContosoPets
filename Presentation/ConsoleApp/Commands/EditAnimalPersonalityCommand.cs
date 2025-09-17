@@ -1,4 +1,4 @@
-﻿using ContosoPets.Application.UseCases.Animals;
+﻿using ContosoPets.Application.Services;
 using ContosoPets.Application.Ports;
 using ContosoPets.Domain.Constants;
 
@@ -6,10 +6,10 @@ namespace ContosoPets.Presentation.ConsoleApp.Commands
 {
     public class EditAnimalPersonalityCommand : IMenuCommand
     {
-        private readonly IAnimalService _service;
+        private readonly IAnimalApplicationService _service;
         private readonly ILinePrinter _output;
 
-        public EditAnimalPersonalityCommand(IAnimalService service, ILinePrinter output)
+        public EditAnimalPersonalityCommand(IAnimalApplicationService service, ILinePrinter output)
         {
             _service = service;
             _output = output;

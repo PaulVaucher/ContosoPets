@@ -1,4 +1,4 @@
-﻿using ContosoPets.Application.UseCases.Animals;
+﻿using ContosoPets.Application.Services;
 using ContosoPets.Application.Ports;
 using ContosoPets.Domain.Constants;
 
@@ -6,10 +6,10 @@ namespace ContosoPets.Presentation.ConsoleApp.Commands
 {
     public class EnsureAgesDescriptionsCommand : IMenuCommand
     {
-        private readonly IAnimalService _service;
+        private readonly IAnimalApplicationService _service;
         private readonly ILinePrinter _output;
 
-        public EnsureAgesDescriptionsCommand(IAnimalService service, ILinePrinter output)
+        public EnsureAgesDescriptionsCommand(IAnimalApplicationService service, ILinePrinter output)
         {
             _service = service;
             _output = output;

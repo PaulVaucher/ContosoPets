@@ -1,4 +1,5 @@
-﻿using ContosoPets.Application.UseCases.Animals;
+﻿using ContosoPets.Application.Services;
+using ContosoPets.Application.UseCases.Animals;
 using ContosoPets.Application.Ports;
 using ContosoPets.Domain.Constants;
 using ContosoPets.Domain.Entities;
@@ -7,10 +8,10 @@ namespace ContosoPets.Presentation.ConsoleApp.Commands
 {
     public class AddNewAnimalCommand : IMenuCommand
     {
-        private readonly IAnimalService _service;
+        private readonly IAnimalApplicationService _service;
         private readonly ILinePrinter _output;
 
-        public AddNewAnimalCommand(IAnimalService service, ILinePrinter output)
+        public AddNewAnimalCommand(IAnimalApplicationService service, ILinePrinter output)
         {
             _service = service;
             _output = output;

@@ -1,5 +1,5 @@
 ﻿using ContosoPets.Application.Ports;
-using ContosoPets.Application.UseCases.Animals;
+using ContosoPets.Application.Services;
 using ContosoPets.Domain.Constants;
 using ContosoPets.Infrastructure.DI;
 using ContosoPets.Presentation.ConsoleApp.Commands;
@@ -16,7 +16,7 @@ namespace ContosoPets.Presentation.ConsoleApp
                 var serviceProvider = ConfigureServices();
                 using (serviceProvider)
                 {
-                    var animalService = serviceProvider.GetRequiredService<IAnimalService>();
+                    var animalService = serviceProvider.GetRequiredService<IAnimalApplicationService>();
                     var output = serviceProvider.GetRequiredService<ILinePrinter>();
 
                     RunApplication(animalService, output);
@@ -45,7 +45,7 @@ namespace ContosoPets.Presentation.ConsoleApp
             }
         }
 
-        private static void RunApplication(IAnimalService animalService, ILinePrinter output)
+        private static void RunApplication(IAnimalApplicationService animalService, ILinePrinter output)
         {
             try
             {                
@@ -63,7 +63,7 @@ namespace ContosoPets.Presentation.ConsoleApp
             }
         }
 
-        private static void RunInteractiveMenu(IAnimalService service, ILinePrinter output)
+        private static void RunInteractiveMenu(IAnimalApplicationService service, ILinePrinter output)
         {
             output.PrintLine(AppConstants.WelcomeMessage);
 
