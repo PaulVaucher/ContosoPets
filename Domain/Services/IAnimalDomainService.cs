@@ -6,8 +6,8 @@ namespace ContosoPets.Domain.Services
     {
         string? ValidateNewAnimal(string species, int petCount);
         string GenerateId(string species, int nextIndex);
-        Animal BuildAnimal(string species, string age, string physicalDescription,
-            string personalityDescription, string nickname, string id);
+        Animal BuildAnimal(string species, string id, string age, string physicalDescription,
+            string personalityDescription, string nickname);
         bool IsSupportedSpecies(string species);
     }
 }

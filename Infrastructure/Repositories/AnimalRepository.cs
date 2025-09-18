@@ -1,6 +1,7 @@
 ﻿using ContosoPets.Application.Ports;
 using ContosoPets.Domain.Constants;
 using ContosoPets.Domain.Entities;
+using ContosoPets.Infrastructure.Serialization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 

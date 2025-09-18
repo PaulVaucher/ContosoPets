@@ -1,6 +1,6 @@
 ﻿using ContosoPets.Application.Ports;
 
-namespace ContosoPets.Infrastructure.OutPut
+namespace ContosoPets.Infrastructure.Output
 {
     public class ConsoleLinePrinter : ILinePrinter
     {

@@ -2,7 +2,7 @@
 using System.Text.Json.Serialization;
 using ContosoPets.Domain.Entities;
 
-namespace ContosoPets.Application.Ports
+namespace ContosoPets.Infrastructure.Serialization
 {
     public class AnimalJsonConverter : JsonConverter<Animal>
     {

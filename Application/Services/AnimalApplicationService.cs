@@ -1,5 +1,4 @@
 ﻿using ContosoPets.Application.Ports;
-using ContosoPets.Application.Services;
 using ContosoPets.Application.UseCases.Animals;
 using ContosoPets.Domain.Constants;
 using ContosoPets.Domain.Entities;
@@ -35,15 +34,13 @@ namespace ContosoPets.Application.Services
                     Success = false,
                     ErrorMessage = validationError
                 };
-            }
-
-            string id = _domainService.GenerateId(request.Species, petCount + 1);
+            }            
 
             try
             {
                 var newAnimal = _domainService.BuildAnimal(
                     request.Species,
-                    id,
+                    _domainService.GenerateId(request.Species, petCount + 1),
                     request.Age,
                     request.PhysicalDescription,
                     request.PersonalityDescription,

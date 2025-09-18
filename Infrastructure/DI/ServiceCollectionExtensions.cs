@@ -1,6 +1,6 @@
 ﻿using ContosoPets.Application.DI;
+using ContosoPets.Application.SharedKernel;
 using ContosoPets.Domain.DI;
-using ContosoPets.Infrastructure.AssemblyReferences;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 

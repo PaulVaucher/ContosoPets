@@ -1,4 +1,4 @@
-﻿using ContosoPets.Infrastructure.AssemblyReferences;
+﻿using ContosoPets.Application.SharedKernel;
 
 namespace ContosoPets.Application.Ports
 {

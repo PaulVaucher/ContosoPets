@@ -26,8 +26,8 @@ namespace ContosoPets.Domain.Services
         }
         public string GenerateId(string species, int nextIndex) =>
             Animal.GenerateId(species, nextIndex);
-        public Animal BuildAnimal(string species, string age, string physicalDescription,
-            string personalityDescription, string nickname, string id)
+        public Animal BuildAnimal(string species, string id, string age, string physicalDescription,
+            string personalityDescription, string nickname)
         {
             return AnimalBuilder.Builder()
                 .WithSpecies(species)
