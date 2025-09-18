@@ -69,88 +69,113 @@ namespace ContosoPets.Application.Services
         {
             return _repository.GetAnimalsWithIncompleteAgeOrDescription();
         }
-
-        public void CompleteAgesAndDescriptions(Dictionary<string, (string Age, string PhysicalDescription)> corrections)
-        {
-            var animalIds = corrections.Keys.ToList();
-            var animals = animalIds.Select(id => _repository.GetById(id))
-                .Where(animal => animal != null)
-                .Cast<Animal>()
-                .ToList();
-
-            bool hasChanges = false;
-
-            foreach (var animal in animals)
-            {
-                if (corrections.TryGetValue(animal.Id, out var values))
-                {
-                    bool animalModified = false;
-
-                    if (!string.IsNullOrEmpty(values.Age))
-                    {
-                        animal.SetAge(values.Age);
-                        animalModified = true;
-                    }
-                    if (!string.IsNullOrEmpty(values.PhysicalDescription))
-                    {
-                        animal.SetPhysicalDescription(values.PhysicalDescription);
-                        animalModified = true;
-                    }
-
-                    if (animalModified)
-                    {
-                        _repository.UpdateAnimal(animal);
-                        hasChanges = true;
-                    }
-                }
-            }
-            if (hasChanges)
-            {
-                _repository.SaveChanges();
-            }
-        }
-
+        
         public List<Animal> GetAnimalsWithIncompleteNicknameOrPersonality()
         {
             return _repository.GetAnimalsWithIncompleteNicknameOrPersonality();
         }
 
-        public void CompleteNicknamesAndPersonality(Dictionary<string, (string Nickname, string Personality)> corrections)
+        private void UpdateAnimalsFromCorrections<T>(
+            Dictionary<string, T> corrections,
+            Action<Animal, T> updateAction)
         {
+            if (corrections == null || !corrections.Any())
+            {
+                throw new ArgumentException(AppConstants.NoCorrectionsProvidedMessage);
+            }
+
             var animalIds = corrections.Keys.ToList();
-            var animals = animalIds.Select(id => _repository.GetById(id))
+            var animals = animalIds
+                .Select(id => _repository.GetById(id))
                 .Where(animal => animal != null)
                 .Cast<Animal>()
                 .ToList();
+
+            if (!animals.Any())
+            {
+                throw new InvalidOperationException(AppConstants.NoAnimalsFoundWithIdsMessage);
+            }
 
             bool hasChanges = false;
 
             foreach (var animal in animals)
             {
-                if (corrections.TryGetValue(animal.Id, out var values))
+                if (corrections.TryGetValue(animal.Id, out var value))
                 {
-                    bool animalModified = false;
-                    if (!string.IsNullOrEmpty(values.Nickname))
+                    try
                     {
-                        animal.SetNickname(values.Nickname);
-                        animalModified = true;
-                    }
-                    if (!string.IsNullOrEmpty(values.Personality))
-                    {
-                        animal.SetPersonalityDescription(values.Personality);
-                        animalModified = true;
-                    }
-                    if (animalModified)
-                    {
+                        updateAction(animal, value);
                         _repository.UpdateAnimal(animal);
                         hasChanges = true;
                     }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException(
+                            string.Format(AppConstants.AnimalOperationErrorFormat, ex.Message));
+                    }
                 }
             }
+
             if (hasChanges)
             {
-                _repository.SaveChanges();
+                try
+                {
+                    _repository.SaveChanges();
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException(
+                        string.Format(AppConstants.AnimalOperationErrorFormat, ex.Message));
+                }
             }
+        }
+
+        public void CompleteAgesAndDescriptions(Dictionary<string, (string Age, string PhysicalDescription)> corrections)
+        {
+            UpdateAnimalsFromCorrections(corrections, (animal, values) =>
+            {
+                bool animalModified = false;
+
+                if (!string.IsNullOrEmpty(values.Age))
+                {
+                    animal.SetAge(values.Age);
+                    animalModified = true;
+                }
+                if (!string.IsNullOrEmpty(values.PhysicalDescription))
+                {
+                    animal.SetPhysicalDescription(values.PhysicalDescription);
+                    animalModified = true;
+                }
+
+                if (!animalModified)
+                {
+                    throw new InvalidOperationException(AppConstants.NoValidModificationsMessage);
+                }
+            });
+        }
+
+        public void CompleteNicknamesAndPersonality(Dictionary<string, (string Nickname, string Personality)> corrections)
+        {
+            UpdateAnimalsFromCorrections(corrections, (animal, values) =>
+            {
+                bool animalModified = false;
+
+                if (!string.IsNullOrEmpty(values.Nickname))
+                {
+                    animal.SetNickname(values.Nickname);
+                    animalModified = true;
+                }
+                if (!string.IsNullOrEmpty(values.Personality))
+                {
+                    animal.SetPersonalityDescription(values.Personality);
+                    animalModified = true;
+                }
+
+                if (!animalModified)
+                {
+                    throw new InvalidOperationException(AppConstants.NoValidModificationsMessage);
+                }
+            });
         }
 
         public Animal? GetAnimalById(string id)

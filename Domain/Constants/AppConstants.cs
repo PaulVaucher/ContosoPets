@@ -62,5 +62,13 @@
         public const string ContinuePrompt = "Press any key to continue...";
         public const string ApplicationExitingMessage = "Application is closing due to a critical error.";
         public const string MenuPrompt = "Your choice: ";
+
+        // Animal update operation messages
+        public const string NoCorrectionsProvidedMessage = "No corrections provided.";
+        public const string NoAnimalsFoundWithIdsMessage = "No animals found with the provided IDs.";
+        public const string AnimalUpdateErrorFormat = "Error updating animal {0}: {1}";
+        public const string NoValidModificationsMessage = "No valid modifications provided.";
+        public const string AnimalNotFoundWithIdFormat = "Animal with ID '{0}' not found.";
+        public const string UnexpectedOperationErrorMessage = "An unexpected error occurred.";
     }
 }
