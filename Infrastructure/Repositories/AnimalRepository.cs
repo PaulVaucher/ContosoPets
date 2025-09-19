@@ -185,7 +185,8 @@ namespace ContosoPets.Infrastructure.Repositories
 
         public void SaveChanges()
         {
-            //for compatibility with the interface            
+            //for compatibility with the interface
+            // TODO: Remove in next iteration - legacy from JSON implementation
         }
     }
 }

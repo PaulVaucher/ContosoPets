@@ -1,21 +1,24 @@
 ﻿using ContosoPets.Application.Ports;
 using ContosoPets.Domain.Entities;
-using ContosoPets.Infrastructure.Services;
+using ContosoPets.Application.Services;
+using ContosoPets.Domain.Services;
 using FluentAssertions;
 using Moq;
 using Xunit;
 
 namespace ContosoPets.UnitTests.Application.Services
 {
-    public class AnimalServiceSearchTests
+    public class AnimalApplicationServiceSearchTests
     {
         private readonly Mock<IAnimalRepository> _mockRepository;
-        private readonly AnimalService _animalService;
+        private readonly Mock<IAnimalDomainService> _mockDomainService;
+        private readonly AnimalApplicationService _animalService;
 
-        public AnimalServiceSearchTests()
+        public AnimalApplicationServiceSearchTests()
         {
             _mockRepository = new Mock<IAnimalRepository>();
-            _animalService = new AnimalService(_mockRepository.Object);
+            _mockDomainService = new Mock<IAnimalDomainService>();
+            _animalService = new AnimalApplicationService(_mockRepository.Object, _mockDomainService.Object);
         }
 
         [Fact]
@@ -79,7 +82,7 @@ namespace ContosoPets.UnitTests.Application.Services
             result.Should().Contain(a => a.Id == "c2");
             result.Should().NotContain(a => a.Id == "d2");
 
-            
+
         }
 
         [Theory]
@@ -120,7 +123,7 @@ namespace ContosoPets.UnitTests.Application.Services
             var result = _animalService.GetAnimalsWithCharacteristic(species, characteristic);
 
             // Assert
-            result.Should().HaveCount(expectedCount);          
+            result.Should().HaveCount(expectedCount);
         }
     }
 }

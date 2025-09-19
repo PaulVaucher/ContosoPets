@@ -1,5 +1,5 @@
-﻿using ContosoPets.Domain.Entities;
-using ContosoPets.Infrastructure.AssemblyReferences;
+﻿using ContosoPets.Application.SharedKernel;
+using ContosoPets.Domain.Entities;
 
 namespace ContosoPets.Application.Ports
 {

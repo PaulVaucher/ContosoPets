@@ -1,15 +1,18 @@
-﻿using ContosoPets.Application.UseCases.Animals;
+﻿using ContosoPets.Application.Services;
+using ContosoPets.Application.Ports;
 using ContosoPets.Domain.Constants;
 
 namespace ContosoPets.Presentation.ConsoleApp.Commands
 {
     public class EnsureNicknamesPersonalityCommand : IMenuCommand
     {
-        private readonly IAnimalService _service;
+        private readonly IAnimalApplicationService _service;
+        private readonly ILinePrinter _output;
 
-        public EnsureNicknamesPersonalityCommand(IAnimalService service)
+        public EnsureNicknamesPersonalityCommand(IAnimalApplicationService service, ILinePrinter output)
         {
             _service = service;
+            _output = output;
         }
 
         public void Execute()
@@ -18,7 +21,7 @@ namespace ContosoPets.Presentation.ConsoleApp.Commands
 
             if (incompleteAnimals.Count == 0)
             {
-                Console.WriteLine(AppConstants.NoAnimalsFoundMessage);
+                _output.PrintLine(AppConstants.NoAnimalsFoundMessage);
                 return;
             }
 
@@ -31,18 +34,18 @@ namespace ContosoPets.Presentation.ConsoleApp.Commands
 
                 if (string.IsNullOrEmpty(animal.Nickname) || animal.Nickname == "tbd")
                 {
-                    Console.WriteLine(string.Format(AppConstants.NicknamePromptFormat, animal.Id));
+                    _output.PrintLine(string.Format(AppConstants.NicknamePromptFormat, animal.Id));
                     nickname = Console.ReadLine() ?? string.Empty;
                 }
                 if (string.IsNullOrEmpty(animal.PersonalityDescription) || animal.PersonalityDescription == "tbd")
                 {
-                    Console.WriteLine(string.Format(AppConstants.PersonalityDescriptionPromptFormat, animal.Id));
+                    _output.PrintLine(string.Format(AppConstants.PersonalityDescriptionPromptFormat, animal.Id));
                     personality = Console.ReadLine() ?? string.Empty;
                 }
                 corrections[animal.Id] = (nickname, personality);
             }
             _service.CompleteNicknamesAndPersonality(corrections);
-            Console.WriteLine(AppConstants.NicknamePersonalityCompleteMessage);
+            _output.PrintLine(AppConstants.NicknamePersonalityCompleteMessage);
         }
     }
 }

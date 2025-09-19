@@ -1,48 +1,54 @@
-﻿using ContosoPets.Application.UseCases.Animals;
+﻿using ContosoPets.Application.Services;
+using ContosoPets.Application.UseCases.Animals;
+using ContosoPets.Application.Ports;
 using ContosoPets.Domain.Constants;
 using ContosoPets.Domain.Entities;
 
 namespace ContosoPets.Presentation.ConsoleApp.Commands
 {
-    public class AddNewAnimalCommand(IAnimalService service) : IMenuCommand
+    public class AddNewAnimalCommand : IMenuCommand
     {
-        private readonly IAnimalService _service = service;
+        private readonly IAnimalApplicationService _service;
+        private readonly ILinePrinter _output;
+
+        public AddNewAnimalCommand(IAnimalApplicationService service, ILinePrinter output)
+        {
+            _service = service;
+            _output = output;
+        }
 
         public void Execute()
         {
             var animals = _service.ListAll();
             int petCount = animals.Count(a => !string.IsNullOrEmpty(a.Id));
-            const int MaxPets = 8;
-            const string CanYes = "y";
-            const string CanNo = "n";
 
-            if (petCount >= MaxPets)
+            if (petCount >= AppConstants.MaxPets)
             {
-                Console.WriteLine(AppConstants.PetLimitReachedMessage);
+                _output.PrintLine(AppConstants.PetLimitReachedMessage);
                 return;
             }
 
-            Console.WriteLine(string.Format(AppConstants.CurrentPetsStatusFormat, petCount, MaxPets - petCount));
-            string anotherPet = CanYes;
+            _output.PrintLine(string.Format(AppConstants.CurrentPetsStatusFormat, petCount, AppConstants.MaxPets - petCount));
+            string anotherPet = AppConstants.YesInput;
 
-            while (anotherPet == CanYes && petCount < MaxPets)
+            while (anotherPet == AppConstants.YesInput && petCount < AppConstants.MaxPets)
             {
-                Console.WriteLine(AppConstants.EnterSpeciesPrompt);
-                var species = Console.ReadLine() ?? string.Empty;
+                _output.PrintLine(AppConstants.EnterSpeciesPrompt);
+                var species = _output.ReadLine() ?? string.Empty;
 
                 var id = Animal.GenerateId(species, petCount + 1);
 
-                Console.WriteLine(string.Format(AppConstants.AgePromptFormat, id));
-                var age = Console.ReadLine();
+                _output.PrintLine(string.Format(AppConstants.AgePromptFormat, id));
+                var age = _output.ReadLine();
 
-                Console.WriteLine(string.Format(AppConstants.PhysicalDescriptionPromptFormat, id));
-                var physical = Console.ReadLine();
+                _output.PrintLine(string.Format(AppConstants.PhysicalDescriptionPromptFormat, id));
+                var physical = _output.ReadLine();
 
-                Console.WriteLine(string.Format(AppConstants.PersonalityDescriptionPromptFormat, id));
-                var personality = Console.ReadLine();
+                _output.PrintLine(string.Format(AppConstants.PersonalityDescriptionPromptFormat, id));
+                var personality = _output.ReadLine();
 
-                Console.WriteLine(string.Format(AppConstants.NicknamePromptFormat, id));
-                var nickname = Console.ReadLine();
+                _output.PrintLine(string.Format(AppConstants.NicknamePromptFormat, id));
+                var nickname = _output.ReadLine();
 
                 var request = new AddAnimalRequest
                 {
@@ -57,23 +63,22 @@ namespace ContosoPets.Presentation.ConsoleApp.Commands
 
                 if (result.Success)
                 {
-                    Console.WriteLine($"Successfully added new {species} with ID: {result.Animal?.Id}");
+                    _output.PrintLine(string.Format(AppConstants.AnimalAddedSuccessFormat, species, result.Animal?.Id));
                     petCount++;
-
                 }
                 else
                 {
-                    Console.WriteLine($"Failed to add new animal: {result.ErrorMessage}");
+                    _output.PrintLine(string.Format(AppConstants.AnimalAddFailedFormat, result.ErrorMessage));
                 }
 
-                if (petCount < MaxPets)
+                if (petCount < AppConstants.MaxPets)
                 {
-                    Console.WriteLine(AppConstants.AddAnotherPetPrompt);
-                    anotherPet = Console.ReadLine()?.ToLower() == CanYes ? CanYes : CanNo;
+                    _output.PrintLine(AppConstants.AddAnotherPetPrompt);
+                    anotherPet = _output.ReadLine()?.ToLower() == AppConstants.YesInput ? AppConstants.YesInput : AppConstants.NoInput;
                 }
                 else
                 {
-                    Console.WriteLine(AppConstants.PetLimitReachedMessage);
+                    _output.PrintLine(AppConstants.PetLimitReachedMessage);
                 }
             }
         }

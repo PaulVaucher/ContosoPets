@@ -9,6 +9,13 @@
         public const string UnknownAge = "?";
         public const string DefaultValue = "tbd";
 
+        // User input values
+        public const string YesInput = "y";
+        public const string NoInput = "n";
+
+        // Error messages - Builder
+        public const string IdMustBeSpecifiedMessage = "ID must be specified.";
+
         // General messages
         public const string WelcomeMessage = "Welcome to the Contoso PetFriends app. Your main menu options are:";
         public const string InvalidOptionMessage = "Invalid option. Please try again.";
@@ -55,5 +62,17 @@
         public const string ContinuePrompt = "Press any key to continue...";
         public const string ApplicationExitingMessage = "Application is closing due to a critical error.";
         public const string MenuPrompt = "Your choice: ";
+
+        // Animal update operation messages
+        public const string NoCorrectionsProvidedMessage = "No corrections provided.";
+        public const string NoAnimalsFoundWithIdsMessage = "No animals found with the provided IDs.";
+        public const string AnimalUpdateErrorFormat = "Error updating animal {0}: {1}";
+        public const string NoValidModificationsMessage = "No valid modifications provided.";
+        public const string AnimalNotFoundWithIdFormat = "Animal with ID '{0}' not found.";
+        public const string UnexpectedOperationErrorMessage = "An unexpected error occurred.";
+
+        // Success and failure messages
+        public const string AnimalAddedSuccessFormat = "Successfully added new {0} with ID: {1}";
+        public const string AnimalAddFailedFormat = "Failed to add new animal: {0}";
     }
 }

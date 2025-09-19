@@ -1,15 +1,18 @@
-﻿using ContosoPets.Application.UseCases.Animals;
+﻿using ContosoPets.Application.Services;
+using ContosoPets.Application.Ports;
 using ContosoPets.Domain.Constants;
 
 namespace ContosoPets.Presentation.ConsoleApp.Commands
 {
     public class ListAllAnimalsCommand : IMenuCommand
     {
-        private readonly IAnimalService _service;
+        private readonly IAnimalApplicationService _service;
+        private readonly ILinePrinter _output;
 
-        public ListAllAnimalsCommand(IAnimalService service)
+        public ListAllAnimalsCommand(IAnimalApplicationService service, ILinePrinter output)
         {
             _service = service;
+            _output = output;
         }
 
         public void Execute()
@@ -17,14 +20,14 @@ namespace ContosoPets.Presentation.ConsoleApp.Commands
             var animals = _service.ListAll();
             if (animals.Count == 0)
             {
-                Console.WriteLine(AppConstants.NoAnimalsFoundMessage);
+                _output.PrintLine(AppConstants.NoAnimalsFoundMessage);
             }
             else
             {
                 foreach (var animal in animals)
                 {
-                    animal.DisplayInfo();
-                    Console.WriteLine();
+                    animal.DisplayInfo(_output);
+                    _output.PrintLine();
                 }
             }
         }

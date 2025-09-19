@@ -1,37 +1,40 @@
-﻿using ContosoPets.Application.UseCases.Animals;
+﻿using ContosoPets.Application.Services;
+using ContosoPets.Application.Ports;
 using ContosoPets.Domain.Constants;
 
 namespace ContosoPets.Presentation.ConsoleApp.Commands
 {
     public class EditAnimalAgeCommand : IMenuCommand
     {
-        private readonly IAnimalService _service;
+        private readonly IAnimalApplicationService _service;
+        private readonly ILinePrinter _output;
 
-        public EditAnimalAgeCommand(IAnimalService service)
+        public EditAnimalAgeCommand(IAnimalApplicationService service, ILinePrinter output)
         {
             _service = service;
+            _output = output;
         }
 
         public void Execute()
         {
-            Console.WriteLine(AppConstants.EnterAnimalIdPrompt, "age");
-            var id = Console.ReadLine() ?? string.Empty;
+            _output.PrintLine(string.Format(AppConstants.EnterAnimalIdPrompt, "age"));
+            var id = _output.ReadLine() ?? string.Empty;
             var animal = _service.GetAnimalById(id);
 
             if (animal == null)
             {
-                Console.WriteLine(AppConstants.AnimalNotFoundMessage);
+                _output.PrintLine(AppConstants.AnimalNotFoundMessage);
                 return;
             }
 
-            Console.WriteLine(string.Format(AppConstants.CurrentAgeFormat, id, animal.Age));
-            Console.WriteLine(string.Format(AppConstants.AgePromptFormat, id));
-            var newAge = Console.ReadLine() ?? string.Empty;
+            _output.PrintLine(string.Format(AppConstants.CurrentAgeFormat, id, animal.Age));
+            _output.PrintLine(string.Format(AppConstants.AgePromptFormat, id));
+            var newAge = _output.ReadLine() ?? string.Empty;
 
             if (_service.UpdateAnimalAge(id, newAge))
-                Console.WriteLine(string.Format(AppConstants.UpdatedAgeFormat, id, newAge));
+                _output.PrintLine(string.Format(AppConstants.UpdatedAgeFormat, id, newAge));
             else
-                Console.WriteLine(AppConstants.AnimalNotFoundMessage);
+                _output.PrintLine(AppConstants.AnimalNotFoundMessage);
         }
     }
 }
