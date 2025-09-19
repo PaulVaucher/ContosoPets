@@ -1,6 +1,9 @@
-﻿using ContosoPets.Application.DI;
+﻿using ContosoPets.Application.Ports;
+using ContosoPets.Application.Services;
 using ContosoPets.Application.SharedKernel;
-using ContosoPets.Domain.DI;
+using ContosoPets.Domain.Services;
+using ContosoPets.Infrastructure.Output;
+using ContosoPets.Infrastructure.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
@@ -13,8 +16,10 @@ namespace ContosoPets.Infrastructure.DI
         /// </summary>
         public static IServiceCollection AddInfrastructure(this IServiceCollection services)
         {
-            services.AddDomainServices();
-            services.AddApplicationServices();
+            services.AddScoped<IAnimalDomainService, AnimalDomainService>();
+            services.AddScoped<IAnimalApplicationService, AnimalApplicationService>();
+            services.AddScoped<IAnimalRepository, AnimalRepository>();
+            services.AddScoped<ILinePrinter, ConsoleLinePrinter>();
 
             services.AddInjectablesFromAssembly(typeof(IAssemblyReference).Assembly);
 

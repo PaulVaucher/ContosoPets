@@ -3,6 +3,7 @@ using ContosoPets.Application.UseCases.Animals;
 using ContosoPets.Domain.Constants;
 using ContosoPets.Domain.Entities;
 using ContosoPets.Domain.Services;
+using ContosoPets.Domain.ValueObjects;
 
 namespace ContosoPets.Application.Services
 {
@@ -76,7 +77,7 @@ namespace ContosoPets.Application.Services
         }
 
         private void UpdateAnimalsFromCorrections<T>(
-            Dictionary<string, T> corrections,
+            Dictionary<AnimalId, T> corrections,
             Action<Animal, T> updateAction)
         {
             if (corrections == null || !corrections.Any())
@@ -86,7 +87,7 @@ namespace ContosoPets.Application.Services
 
             var animalIds = corrections.Keys.ToList();
             var animals = animalIds
-                .Select(id => _repository.GetById(id))
+                .Select(id => _repository.GetById(id.Value))
                 .Where(animal => animal != null)
                 .Cast<Animal>()
                 .ToList();
@@ -100,7 +101,8 @@ namespace ContosoPets.Application.Services
 
             foreach (var animal in animals)
             {
-                if (corrections.TryGetValue(animal.Id, out var value))
+                var animalId = new AnimalId(animal.Id);
+                if (corrections.TryGetValue(animalId, out var value))
                 {
                     try
                     {
@@ -130,7 +132,7 @@ namespace ContosoPets.Application.Services
             }
         }
 
-        public void CompleteAgesAndDescriptions(Dictionary<string, (string Age, string PhysicalDescription)> corrections)
+        public void CompleteAgesAndDescriptions(Dictionary<AnimalId, (string Age, string PhysicalDescription)> corrections)
         {
             UpdateAnimalsFromCorrections(corrections, (animal, values) =>
             {
@@ -154,7 +156,7 @@ namespace ContosoPets.Application.Services
             });
         }
 
-        public void CompleteNicknamesAndPersonality(Dictionary<string, (string Nickname, string Personality)> corrections)
+        public void CompleteNicknamesAndPersonality(Dictionary<AnimalId, (string Nickname, string Personality)> corrections)
         {
             UpdateAnimalsFromCorrections(corrections, (animal, values) =>
             {

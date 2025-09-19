@@ -1,11 +1,12 @@
 ﻿using ContosoPets.Application.Ports;
+using ContosoPets.Domain.ValueObjects;
 
 namespace ContosoPets.Domain.Entities
 {
     public abstract class Animal
     {
         public string Species { get; private set; } = string.Empty;
-        public string Id { get; private set; } = string.Empty;
+        public AnimalId Id { get; private set; } = null!;
         public string Age { get; private set; } = "?";
         public string PhysicalDescription { get; private set; } = "tbd";
         public string PersonalityDescription { get; private set; } = "tbd";
@@ -16,7 +17,7 @@ namespace ContosoPets.Domain.Entities
         protected Animal(string species, string id, string age, string physicalDescription, string personalityDescription, string nickname)
         {
             Species = species;
-            Id = id;
+            Id = new AnimalId(id);
             Age = age;
             PhysicalDescription = physicalDescription;
             PersonalityDescription = personalityDescription;

@@ -2,6 +2,7 @@
 using ContosoPets.Application.Services;
 using ContosoPets.Domain.Entities;
 using ContosoPets.Domain.Services;
+using ContosoPets.Domain.ValueObjects;
 using FluentAssertions;
 using Moq;
 using Xunit;
@@ -155,7 +156,7 @@ namespace ContosoPets.UnitTests.Application.Services
 
             // Assert
             result.Should().NotBeNull();
-            result!.Id.Should().Be("d1");
+            result!.Id.Should().Be(new AnimalId("d1"));
             result.Species.Should().Be("dog");
         }
 

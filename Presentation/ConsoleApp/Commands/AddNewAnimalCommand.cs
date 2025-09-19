@@ -76,7 +76,7 @@ namespace ContosoPets.Presentation.ConsoleApp.Commands
                 if (petCount < AppConstants.MaxPets)
                 {
                     _output.PrintLine(AppConstants.AddAnotherPetPrompt);
-                    anotherPet = Console.ReadLine()?.ToLower() == AppConstants.YesInput ? AppConstants.YesInput : AppConstants.NoInput;
+                    anotherPet = _output.ReadLine()?.ToLower() == AppConstants.YesInput ? AppConstants.YesInput : AppConstants.NoInput;
                 }
                 else
                 {

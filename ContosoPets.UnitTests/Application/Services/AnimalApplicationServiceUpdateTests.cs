@@ -2,6 +2,7 @@
 using ContosoPets.Application.Services;
 using ContosoPets.Domain.Entities;
 using ContosoPets.Domain.Services;
+using ContosoPets.Domain.ValueObjects;
 using FluentAssertions;
 using Moq;
 using Xunit;
@@ -64,10 +65,10 @@ namespace ContosoPets.UnitTests.Application.Services
             _mockRepository.Setup(r => r.GetById("d1")).Returns(dog);
             _mockRepository.Setup(r => r.GetById("c1")).Returns(cat);
 
-            var corrections = new Dictionary<string, (string Age, string PhysicalDescription)>
+            var corrections = new Dictionary<AnimalId, (string Age, string PhysicalDescription)>
             {
-                ["d1"] = ("3 years", "Golden fur"),
-                ["c1"] = ("2 years", "Silky black")
+                [new AnimalId("d1")] = ("3 years", "Golden fur"),
+                [new AnimalId("c1")] = ("2 years", "Silky black")
             };
 
             // Act
@@ -111,10 +112,10 @@ namespace ContosoPets.UnitTests.Application.Services
             _mockRepository.Setup(r => r.GetById("d1")).Returns(dog);
             _mockRepository.Setup(r => r.GetById("c1")).Returns(cat);
 
-            var corrections = new Dictionary<string, (string Nickname, string Personality)>
+            var corrections = new Dictionary<AnimalId, (string Nickname, string Personality)>
             {
-                ["d1"] = ("Buddy", "Friendly and energetic"),
-                ["c1"] = ("Shadow", "Mysterious and independent")
+                [new AnimalId("d1")] = ("Buddy", "Friendly and energetic"),
+                [new AnimalId("c1")] = ("Shadow", "Mysterious and independent")
             };
 
             // Act
