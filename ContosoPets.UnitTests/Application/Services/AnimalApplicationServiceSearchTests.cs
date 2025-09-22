@@ -2,6 +2,7 @@
 using ContosoPets.Domain.Entities;
 using ContosoPets.Application.Services;
 using ContosoPets.Domain.Services;
+using ContosoPets.Domain.ValueObjects;
 using FluentAssertions;
 using Moq;
 using Xunit;
@@ -77,10 +78,10 @@ namespace ContosoPets.UnitTests.Application.Services
 
             // Assert
             result.Should().HaveCount(3);
-            result.Should().Contain(a => a.Id == "d1");
-            result.Should().Contain(a => a.Id == "c1");
-            result.Should().Contain(a => a.Id == "c2");
-            result.Should().NotContain(a => a.Id == "d2");
+            result.Should().Contain(a => a.Id.Value == "d1");
+            result.Should().Contain(a => a.Id.Value == "c1");
+            result.Should().Contain(a => a.Id.Value == "c2");
+            result.Should().NotContain(a => a.Id.Value == "d2");
 
 
         }
@@ -109,12 +110,9 @@ namespace ContosoPets.UnitTests.Application.Services
                     filteredResults.Add(new Dog("dog", "d1", "2 years", "Golden fur", "Friendly and playful", "Rex"));
                 }
             }
-            else if (species.Equals("cat", StringComparison.OrdinalIgnoreCase))
+            else if (species.Equals("cat", StringComparison.OrdinalIgnoreCase) && characteristic.Equals("black", StringComparison.OrdinalIgnoreCase))
             {
-                if (characteristic.Equals("black", StringComparison.OrdinalIgnoreCase))
-                {
-                    filteredResults.Add(new Cat("cat", "c1", "1 year", "Tabby with black stripes", "Curious and independent", "Whiskers"));
-                }
+                filteredResults.Add(new Cat("cat", "c1", "1 year", "Tabby with black stripes", "Curious and independent", "Whiskers"));                
             }
             _mockRepository.Setup(r => r.GetAnimalsWithCharacteristic(species, characteristic))
                 .Returns(filteredResults);

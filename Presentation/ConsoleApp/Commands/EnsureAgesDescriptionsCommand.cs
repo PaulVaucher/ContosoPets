@@ -1,6 +1,7 @@
 ﻿using ContosoPets.Application.Services;
 using ContosoPets.Application.Ports;
 using ContosoPets.Domain.Constants;
+using ContosoPets.Domain.ValueObjects;
 
 namespace ContosoPets.Presentation.ConsoleApp.Commands
 {
@@ -24,7 +25,7 @@ namespace ContosoPets.Presentation.ConsoleApp.Commands
                 return;
             }
 
-            var corrections = new Dictionary<string, (string Age, string PhysicalDescription)>();
+            var corrections = new Dictionary<AnimalId, (string Age, string PhysicalDescription)>();
             foreach (var animal in incompleteAnimals)
             {
                 if (string.IsNullOrEmpty(animal.Age) || animal.Age == "?")

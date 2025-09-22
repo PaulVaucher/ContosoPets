@@ -1,5 +1,6 @@
 ﻿using ContosoPets.Domain.Builders;
 using ContosoPets.Domain.Entities;
+using ContosoPets.Domain.ValueObjects;
 using FluentAssertions;
 using Xunit;
 
@@ -26,7 +27,7 @@ namespace ContosoPets.UnitTests.Domain.Builders
             // Assert
             result.Should().BeOfType<Dog>();
             result.Species.Should().Be("dog");
-            result.Id.Should().Be("d1");
+            result.Id.Value.Should().Be("d1");
             result.Age.Should().Be("2 years");
             result.Nickname.Should().Be("Rex");
 

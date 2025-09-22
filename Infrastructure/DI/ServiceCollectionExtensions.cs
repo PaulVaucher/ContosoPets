@@ -1,7 +1,7 @@
-﻿using ContosoPets.Application.DI;
-using ContosoPets.Application.Ports;
+﻿using ContosoPets.Application.Ports;
+using ContosoPets.Application.Services;
 using ContosoPets.Application.SharedKernel;
-using ContosoPets.Domain.DI;
+using ContosoPets.Domain.Services;
 using ContosoPets.Infrastructure.Configuration;
 using ContosoPets.Infrastructure.Database;
 using ContosoPets.Infrastructure.Output;
@@ -20,8 +20,11 @@ namespace ContosoPets.Infrastructure.DI
         /// </summary>
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddDomainServices();
-            services.AddApplicationServices();
+            services.AddScoped<IAnimalDomainService, AnimalDomainService>();
+            services.AddScoped<IAnimalApplicationService, AnimalApplicationService>();
+
+            services.AddScoped<IAnimalRepository, AnimalRepository>();
+            services.AddSingleton<ILinePrinter, ConsoleLinePrinter>();
 
             services.AddLogging();
 
@@ -30,9 +33,7 @@ namespace ContosoPets.Infrastructure.DI
                 var nhConfig = new NHibernateConfiguration(configuration);
                 return nhConfig.CreateSessionFactory();
             });
-
-            services.AddScoped<IAnimalRepository, AnimalRepository>();
-            services.AddSingleton<ILinePrinter, ConsoleLinePrinter>();
+            
             services.AddSingleton<DatabaseInitializer>();
 
             services.AddInjectablesFromAssembly(typeof(IAssemblyReference).Assembly);

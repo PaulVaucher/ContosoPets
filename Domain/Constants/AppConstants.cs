@@ -44,8 +44,8 @@
         public const string NicknamePersonalityCompleteMessage = "Nickname and personality information is complete for all animals.";
 
         // Update messages
-        public const string CurrentAgeFormat = "Current age for {0} is {1}.\nEnter new age or '?' if unknown:";
-        public const string UpdatedAgeFormat = "Updated age for {0} to {1}.\nEnter new personality description:";
+        public const string CurrentAgeFormat = "Current age for {0} is {1}.";
+        public const string UpdatedAgeFormat = "Updated age for {0} to {1}.";
         public const string CurrentPersonalityFormat = "Current personality for {0}: {1}";
         public const string UpdatedPersonalityMessage = "Personality updated successfully.";
 

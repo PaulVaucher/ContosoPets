@@ -4,6 +4,7 @@ using ContosoPets.Application.UseCases.Animals;
 using ContosoPets.Domain.Constants;
 using ContosoPets.Domain.Entities;
 using ContosoPets.Domain.Services;
+using ContosoPets.Domain.ValueObjects;
 using FluentAssertions;
 using Moq;
 using Xunit;
@@ -80,7 +81,7 @@ namespace ContosoPets.UnitTests.Application.Services
             result.Success.Should().BeTrue();
             result.Animal.Should().NotBeNull();
             result.Animal!.Species.Should().Be("dog");
-            result.Animal.Id.Should().Be("d1");
+            result.Animal.Id.Value.Should().Be("d1");
 
             _mockRepository.Verify(r => r.AddAnimal(expectedAnimal), Times.Once);
             _mockRepository.Verify(r => r.SaveChanges(), Times.Once);
@@ -122,7 +123,7 @@ namespace ContosoPets.UnitTests.Application.Services
         public void ListAll_WhenRepositoryReturnsNull_ShouldReturnEmptyList()
         {
             // Arrange
-            _mockRepository.Setup(r => r.GetAllAnimals()).Returns((List<Animal>?)null);
+            _mockRepository.Setup(r => r.GetAllAnimals()).Returns(new List<Animal>());
 
             // Act
             var result = _animalService.ListAll();

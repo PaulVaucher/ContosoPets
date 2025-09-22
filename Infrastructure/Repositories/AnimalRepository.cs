@@ -87,7 +87,7 @@ namespace ContosoPets.Infrastructure.Repositories
             }
 
             // Use reflection to set the protected properties 'Id', 'Species', etc.
-            typeof(NHAnimal).GetProperty("Id")?.SetValue(nhAnimal, animal.Id);
+            typeof(NHAnimal).GetProperty("Id")?.SetValue(nhAnimal, animal.Id.Value);
             typeof(NHAnimal).GetProperty("Species")?.SetValue(nhAnimal, animal.Species);
             typeof(NHAnimal).GetProperty("Age")?.SetValue(nhAnimal, animal.Age);
             typeof(NHAnimal).GetProperty("PhysicalDescription")?.SetValue(nhAnimal, animal.PhysicalDescription);
@@ -128,7 +128,7 @@ namespace ContosoPets.Infrastructure.Repositories
 
             try
             {
-                var nhAnimal = session.Get<NHAnimal>(animal.Id);
+                var nhAnimal = session.Get<NHAnimal>(animal.Id.Value);
                 if (nhAnimal != null)
                 {
                     session.Delete(nhAnimal);
@@ -147,8 +147,8 @@ namespace ContosoPets.Infrastructure.Repositories
             using var session = _sessionFactory.OpenSession();
             var nhAnimals = session.Query<NHAnimal>()
                 .Where(a => a.Id != null && a.Id != "" &&
-                            ((a.Nickname == null || a.Nickname == "" || a.Nickname == AppConstants.DefaultValue) ||
-                             (a.PersonalityDescription == null || a.PersonalityDescription == "" || a.PersonalityDescription == AppConstants.DefaultValue)))
+                            ((a.Age == null || a.Age == "" || a.Age == AppConstants.UnknownAge) ||
+                             (a.PhysicalDescription == null || a.PhysicalDescription == "" || a.PhysicalDescription == AppConstants.DefaultValue)))
                 .ToList();
 
             return nhAnimals.Select(ToDomain).ToList();

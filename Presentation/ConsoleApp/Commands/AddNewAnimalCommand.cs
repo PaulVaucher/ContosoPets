@@ -20,7 +20,7 @@ namespace ContosoPets.Presentation.ConsoleApp.Commands
         public void Execute()
         {
             var animals = _service.ListAll();
-            int petCount = animals.Count(a => !string.IsNullOrEmpty(a.Id));
+            int petCount = animals.Count(a => !string.IsNullOrEmpty(a.Id.Value));
 
             if (petCount >= AppConstants.MaxPets)
             {

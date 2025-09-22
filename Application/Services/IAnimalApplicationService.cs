@@ -1,6 +1,7 @@
 ﻿using ContosoPets.Application.SharedKernel;
 using ContosoPets.Application.UseCases.Animals;
 using ContosoPets.Domain.Entities;
+using ContosoPets.Domain.ValueObjects;
 
 namespace ContosoPets.Application.Services
 {
@@ -10,8 +11,8 @@ namespace ContosoPets.Application.Services
         AddAnimalResult AddNewAnimal(AddAnimalRequest request);
         List<Animal> GetAnimalsWithIncompleteAgeOrDescription();
         List<Animal> GetAnimalsWithIncompleteNicknameOrPersonality();
-        void CompleteAgesAndDescriptions(Dictionary<string, (string Age, string PhysicalDescription)> corrections);
-        void CompleteNicknamesAndPersonality(Dictionary<string, (string Nickname, string Personality)> corrections);
+        void CompleteAgesAndDescriptions(Dictionary<AnimalId, (string Age, string PhysicalDescription)> corrections);
+        void CompleteNicknamesAndPersonality(Dictionary<AnimalId, (string Nickname, string Personality)> corrections);
         Animal? GetAnimalById(string id);
         bool UpdateAnimalAge(string id, string newAge);
         bool UpdateAnimalPersonality(string id, string newPersonality);
