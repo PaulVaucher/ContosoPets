@@ -14,6 +14,6 @@ namespace ContosoPets.Application.Ports
         List<Animal> GetAnimalsWithIncompleteAgeOrDescription();
         List<Animal> GetAnimalsWithIncompleteNicknameOrPersonality();
         List<Animal> GetAnimalsWithCharacteristic(string species, string characteristic);
-        void SaveChanges(); // for compatibility with interface
+        
     }
 }

@@ -1,8 +1,8 @@
 ﻿using ContosoPets.Application.Ports;
-using ContosoPets.Domain.Entities;
 using ContosoPets.Application.Services;
+using ContosoPets.Domain.Entities;
 using ContosoPets.Domain.Services;
-using ContosoPets.Domain.ValueObjects;
+using ContosoPets.UnitTests.TestInfrastructure.Fakes;
 using FluentAssertions;
 using Moq;
 using Xunit;
@@ -29,9 +29,9 @@ namespace ContosoPets.UnitTests.Application.Services
             var animals = new List<Animal>
             {
                 new Dog("dog", "d1", "?", "Golden fur", "Frieendly", "Rex"), // Incomplete age
-                new Cat("cat", "c1", "3 years", "tbd", "Independent", "Whiskers"), // Incomplete physical description
-                new Dog("dog", "d2", "2 years", "Black fur", "Playful", "Buddy"), // Complete
-                new Cat("cat", "c2", "", "", "Curious", "Mittens") // Empty age and physical description
+                new Cat("cat", "c2", "3 years", "tbd", "Independent", "Whiskers"), // Incomplete physical description
+                new Dog("dog", "d3", "2 years", "Black fur", "Playful", "Buddy"), // Complete
+                new Cat("cat", "c4", "", "", "Curious", "Mittens") // Empty age and physical description
             };
 
             var filteredAnimals = animals.Where(a =>
@@ -47,10 +47,10 @@ namespace ContosoPets.UnitTests.Application.Services
 
             // Assert
             result.Should().HaveCount(3);
-            result.Should().Contain(a => a.Id == "d1");
-            result.Should().Contain(a => a.Id == "c1");
-            result.Should().Contain(a => a.Id == "c2");
-            result.Should().NotContain(a => a.Id == "d2");
+            result.Should().Contain(a => a.Id.Value == "d1");
+            result.Should().Contain(a => a.Id.Value == "c2");
+            result.Should().Contain(a => a.Id.Value == "c4");
+            result.Should().NotContain(a => a.Id == "d3");
         }
 
         [Fact]
@@ -60,9 +60,9 @@ namespace ContosoPets.UnitTests.Application.Services
             var animals = new List<Animal>
             {
                 new Dog("dog", "d1", "2 years", "Golden fur", "tbd", "Rex"), // Incomplete personality
-                new Cat("cat", "c1", "3 years", "Short hair", "", "Whiskers"), // Empty personality
-                new Dog("dog", "d2", "2 years", "Black fur", "Playful", "Buddy"), // Complete
-                new Cat("cat", "c2", "1 year", "Tabby", "Curious", "tbd") // Incomplete nickname
+                new Cat("cat", "c2", "3 years", "Short hair", "", "Whiskers"), // Empty personality
+                new Dog("dog", "d3", "2 years", "Black fur", "Playful", "Buddy"), // Complete
+                new Cat("cat", "c4", "1 year", "Tabby", "Curious", "tbd") // Incomplete nickname
             };
 
             var filteredAnimals = animals.Where(a =>
@@ -79,9 +79,9 @@ namespace ContosoPets.UnitTests.Application.Services
             // Assert
             result.Should().HaveCount(3);
             result.Should().Contain(a => a.Id.Value == "d1");
-            result.Should().Contain(a => a.Id.Value == "c1");
             result.Should().Contain(a => a.Id.Value == "c2");
-            result.Should().NotContain(a => a.Id.Value == "d2");
+            result.Should().Contain(a => a.Id.Value == "c4");
+            result.Should().NotContain(a => a.Id.Value == "d3");
 
 
         }
@@ -112,7 +112,7 @@ namespace ContosoPets.UnitTests.Application.Services
             }
             else if (species.Equals("cat", StringComparison.OrdinalIgnoreCase) && characteristic.Equals("black", StringComparison.OrdinalIgnoreCase))
             {
-                filteredResults.Add(new Cat("cat", "c1", "1 year", "Tabby with black stripes", "Curious and independent", "Whiskers"));                
+                filteredResults.Add(new Cat("cat", "c2", "1 year", "Tabby with black stripes", "Curious and independent", "Whiskers"));                
             }
             _mockRepository.Setup(r => r.GetAnimalsWithCharacteristic(species, characteristic))
                 .Returns(filteredResults);
@@ -122,6 +122,89 @@ namespace ContosoPets.UnitTests.Application.Services
 
             // Assert
             result.Should().HaveCount(expectedCount);
+        }
+
+        [Fact]
+        public void GetAnimalsWithIncompleteAgeOrDescription_ShouldReturnFilteredResults_WithFakes()
+        {
+            //Arrange
+            // Arrange
+            var fakeRepository = new FakeAnimalRepository();
+            var fakeDomainService = new FakeAnimalDomainService();
+            var service = new AnimalApplicationService(fakeRepository, fakeDomainService);
+
+            fakeRepository.SeedWith(
+                new Dog("dog", "d1", "?", "Golden fur", "Friendly", "Rex"), // Incomplete age
+                new Cat("cat", "c2", "3 years", "tbd", "Independent", "Whiskers"), // Incomplete description
+                new Dog("dog", "d3", "2 years", "Black fur", "Playful", "Buddy"), // Complete
+                new Cat("cat", "c4", "", "", "Curious", "Mittens") // Empty values
+            );
+
+            //Act
+            var result = service.GetAnimalsWithIncompleteAgeOrDescription();
+
+            //Assert
+            result.Should().HaveCount(3);
+            result.Should().Contain(a => a.Id.Value == "d1");
+            result.Should().Contain(a => a.Id.Value == "c2");
+            result.Should().Contain(a => a.Id.Value == "c4");
+            result.Should().NotContain(a => a.Id.Value == "d3");
+        }
+
+        [Fact]
+        public void GetAnimalsWithIncompleteNicknameOrPersonality_ShouldReturnFilteredResults_WithFakes()
+        {
+            // Arrange
+            var fakeRepository = new FakeAnimalRepository();
+            var fakeDomainService = new FakeAnimalDomainService();
+            var service = new AnimalApplicationService(fakeRepository, fakeDomainService);
+
+            fakeRepository.SeedWith(
+                new Dog("dog", "d1", "2 years", "Golden fur", "tbd", "Rex"), // Incomplete personality
+                new Cat("cat", "c2", "3 years", "Short hair", "", "Whiskers"), // Empty personality
+                new Dog("dog", "d3", "2 years", "Black fur", "Playful", "Buddy"), // Complete
+                new Cat("cat", "c4", "1 year", "Tabby", "Curious", "tbd") // Incomplete nickname
+            );
+
+            // Act
+            var result = service.GetAnimalsWithIncompleteNicknameOrPersonality();
+
+            // Assert
+            result.Should().HaveCount(3);
+            result.Should().Contain(a => a.Id.Value == "d1");
+            result.Should().Contain(a => a.Id.Value == "c2");
+            result.Should().Contain(a => a.Id.Value == "c4");
+            result.Should().NotContain(a => a.Id.Value == "d3");
+        }
+
+        [Fact]
+        public void GetAnimalsWithCharacteristic_ShouldFilterCorrectly_WithFakes()
+        {
+            // Arrange
+            var fakeRepository = new FakeAnimalRepository();
+            var fakeDomainService = new FakeAnimalDomainService();
+            var service = new AnimalApplicationService(fakeRepository, fakeDomainService);
+
+            fakeRepository.SeedWith(
+                new Dog("dog", "d1", "2 years", "Golden fur", "Friendly and energetic", "Rex"),
+                new Dog("dog", "d3", "3 years", "Black fur", "Calm", "Shadow"),
+                new Cat("cat", "c2", "1 year", "White fur", "Playful", "Snow")
+            );
+
+            // Act
+            var friendlyDogs = service.GetAnimalsWithCharacteristic("dog", "friendly");
+            var goldenAnimals = service.GetAnimalsWithCharacteristic("dog", "golden");
+            var playfulCats = service.GetAnimalsWithCharacteristic("cat", "playful");
+
+            // Assert
+            friendlyDogs.Should().HaveCount(1);
+            friendlyDogs[0].Id.Value.Should().Be("d1");
+
+            goldenAnimals.Should().HaveCount(1);
+            goldenAnimals[0].Id.Value.Should().Be("d1");
+
+            playfulCats.Should().HaveCount(1);
+            playfulCats[0].Id.Value.Should().Be("c2");
         }
     }
 }

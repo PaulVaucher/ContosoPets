@@ -1,6 +1,5 @@
 ﻿using ContosoPets.Domain.Builders;
 using ContosoPets.Domain.Entities;
-using ContosoPets.Domain.ValueObjects;
 using FluentAssertions;
 using Xunit;
 
@@ -81,7 +80,7 @@ namespace ContosoPets.UnitTests.Domain.Builders
             // Act - Second Build
             var secondAnimal = builder
                 .WithSpecies("cat")
-                .WithId("c1")
+                .WithId("c2")
                 .WithNickname("Whiskers")
                 .Build();
 

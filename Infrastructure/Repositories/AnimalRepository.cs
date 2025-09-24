@@ -181,13 +181,7 @@ namespace ContosoPets.Infrastructure.Repositories
                 .ToList();
 
             return nhAnimals.Select(ToDomain).ToList();
-        }
-
-        public void SaveChanges()
-        {
-            //for compatibility with the interface
-            // TODO: Remove in next iteration - legacy from JSON implementation
-        }
+        }        
     }
 }
 

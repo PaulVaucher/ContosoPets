@@ -21,7 +21,7 @@ namespace ContosoPets.UnitTests.Helpers
         {
             return new Cat(
                 "cat",
-                id ?? "c1",
+                id ?? "c2",
                 "3 years",
                 "Black fur",
                 "Independent",

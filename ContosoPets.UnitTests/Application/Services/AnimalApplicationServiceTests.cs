@@ -4,7 +4,7 @@ using ContosoPets.Application.UseCases.Animals;
 using ContosoPets.Domain.Constants;
 using ContosoPets.Domain.Entities;
 using ContosoPets.Domain.Services;
-using ContosoPets.Domain.ValueObjects;
+using ContosoPets.UnitTests.TestInfrastructure.Fakes;
 using FluentAssertions;
 using Moq;
 using Xunit;
@@ -50,7 +50,6 @@ namespace ContosoPets.UnitTests.Application.Services
             result.Animal.Should().BeNull();
 
             _mockRepository.Verify(r => r.AddAnimal(It.IsAny<Animal>()), Times.Never);
-            _mockRepository.Verify(r => r.SaveChanges(), Times.Never);
         }
 
         [Fact]
@@ -84,7 +83,6 @@ namespace ContosoPets.UnitTests.Application.Services
             result.Animal.Id.Value.Should().Be("d1");
 
             _mockRepository.Verify(r => r.AddAnimal(expectedAnimal), Times.Once);
-            _mockRepository.Verify(r => r.SaveChanges(), Times.Once);
         }
 
         [Theory]
@@ -116,7 +114,6 @@ namespace ContosoPets.UnitTests.Application.Services
             result.Animal.Should().BeNull();
 
             _mockRepository.Verify(r => r.AddAnimal(It.IsAny<Animal>()), Times.Never);
-            _mockRepository.Verify(r => r.SaveChanges(), Times.Never);
         }
 
         [Fact]
@@ -132,6 +129,127 @@ namespace ContosoPets.UnitTests.Application.Services
             result.Should().NotBeNull();
             result.Should().BeEmpty();
             _mockRepository.Verify(r => r.GetAllAnimals(), Times.Once);
+        }
+
+        [Fact]
+        public void AddNewAnimal_WhenPetLimitReached_ShouldReturnFailure_WithFakes()
+        {
+            //Arrange
+            var fakeRepository = new FakeAnimalRepository();
+            var fakeDomainService = new FakeAnimalDomainService();
+            var service = new AnimalApplicationService(fakeRepository, fakeDomainService);
+
+            for (int i = 1; i <= AppConstants.MaxPets; i++)
+            {
+                fakeRepository.AddAnimal(new Dog("dog", $"d{i}", "2 years", "Brown", "Friendly", $"dog{i}"));
+            }
+
+            var request = new AddAnimalRequest()
+            {
+                Species = "dog",
+                Age = "2 years",
+                PhysicalDescription = "Brown fur",
+                PersonalityDescription = "Friendly",
+                Nickname = "Buddy"
+            };
+
+            //Act
+            var result = service.AddNewAnimal(request);
+
+            //Assert
+            result.Success.Should().BeFalse();
+            result.ErrorMessage.Should().Be(AppConstants.PetLimitReachedMessage);
+            result.Animal.Should().BeNull();
+
+            fakeRepository.GetAnimalCount().Should().Be(8);
+        }
+
+        [Fact]
+        public void AddNewAnimal_WithValidRequest_ShouldReturnSuccess_WithFakes()
+        {
+            //Arrange
+            var fakeRepository = new FakeAnimalRepository();
+            var fakeDomainService = new FakeAnimalDomainService();
+            var service = new AnimalApplicationService(fakeRepository, fakeDomainService);
+
+            var request = new AddAnimalRequest()
+            {
+                Species = "dog",
+                Age = "2 years",
+                PhysicalDescription = "Golden fur",
+                PersonalityDescription = "Friendly",
+                Nickname = "Rex"
+            };
+
+            //Act
+            var result = service.AddNewAnimal(request);
+
+            //Assert
+            result.Success.Should().BeTrue();
+            result.Animal.Should().NotBeNull();
+            result.Animal!.Species.Should().Be("dog");
+            result.Animal.Id.Value.Should().Be("d1");
+            result.Animal.Age.Should().Be("2 years");
+            result.Animal.Nickname.Should().Be("Rex");
+
+            fakeRepository.GetAnimalCount().Should().Be(1);
+            var savedAnimal = fakeRepository.GetById("d1");
+            savedAnimal.Should().NotBeNull();
+            savedAnimal!.Nickname.Should().Be("Rex");
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData("bird")]
+        [InlineData("fish")]
+        public void AddNewAnimal_WhitInvalidSpecies_ShouldReturnFailure_WithFakes(string invalidSpecies)
+        {
+            // Arrange
+            var fakeRepository = new FakeAnimalRepository();
+            var fakeDomainService = new FakeAnimalDomainService();
+            var service = new AnimalApplicationService(fakeRepository, fakeDomainService);
+
+            var request = new AddAnimalRequest
+            {
+                Species = invalidSpecies,
+                Age = "2 years",
+                PhysicalDescription = "Description",
+                PersonalityDescription = "Personality",
+                Nickname = "Name"
+            };
+
+            //Act
+            var result = service.AddNewAnimal(request);
+
+            //Assert
+            result.Success.Should().BeFalse();
+            result.ErrorMessage.Should().Be(AppConstants.InvalidSpeciesMessage);
+            result.Animal.Should().BeNull();
+            fakeRepository.GetAnimalCount().Should().Be(0);
+        }
+
+        [Fact]
+        public void ListAll_WithMultipleAnimals_ShouldReturnAllAnimals_WithFakes()
+        {
+            //Arrange
+            // Arrange
+            var fakeRepository = new FakeAnimalRepository();
+            var fakeDomainService = new FakeAnimalDomainService();
+            var service = new AnimalApplicationService(fakeRepository, fakeDomainService);
+
+            var dog = new Dog("dog", "d1", "2 years", "Golden", "Friendly", "Rex");
+            var cat = new Cat("cat", "c2", "3 years", "Black", "Independent", "Whiskers");
+            fakeRepository.SeedWith(dog, cat);
+
+            //Act
+            var result = service.ListAll();
+
+            //Assert
+            result.Should().HaveCount(2);
+            result.Should().Contain(a => a.Id.Value == "d1");
+            result.Should().Contain(a => a.Id.Value == "c2");
+            result.Should().Contain(a => a.Species == "dog");
+            result.Should().Contain(a => a.Species == "cat");
         }
     }
 }

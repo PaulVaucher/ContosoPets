@@ -51,7 +51,6 @@ namespace ContosoPets.Application.Services
                     request.Nickname);
 
                 _repository.AddAnimal(newAnimal);
-                _repository.SaveChanges();
 
                 return new AddAnimalResult
                 {
@@ -100,8 +99,6 @@ namespace ContosoPets.Application.Services
                 throw new InvalidOperationException(AppConstants.NoAnimalsFoundWithIdsMessage);
             }
 
-            bool hasChanges = false;
-
             foreach (var animal in animals)
             {
                 if (corrections.TryGetValue(animal.Id, out var value))
@@ -110,7 +107,6 @@ namespace ContosoPets.Application.Services
                     {
                         updateAction(animal, value);
                         _repository.UpdateAnimal(animal);
-                        hasChanges = true;
                     }
                     catch (Exception ex)
                     {
@@ -118,20 +114,7 @@ namespace ContosoPets.Application.Services
                             string.Format(AppConstants.AnimalUpdateErrorFormat, animal.Id, ex.Message));
                     }
                 }
-            }
-
-            if (hasChanges)
-            {
-                try
-                {
-                    _repository.SaveChanges();
-                }
-                catch (Exception ex)
-                {
-                    throw new InvalidOperationException(
-                        string.Format(AppConstants.AnimalOperationErrorFormat, ex.Message));
-                }
-            }
+            }            
         }
 
         public void CompleteAgesAndDescriptions(Dictionary<AnimalId, (string Age, string PhysicalDescription)> corrections)
@@ -194,7 +177,6 @@ namespace ContosoPets.Application.Services
             {
                 animal.SetAge(newAge);
                 _repository.UpdateAnimal(animal);
-                _repository.SaveChanges();
                 return true;
             }
             return false;
@@ -207,7 +189,6 @@ namespace ContosoPets.Application.Services
             {
                 animal.SetPersonalityDescription(newPersonality);
                 _repository.UpdateAnimal(animal);
-                _repository.SaveChanges();
                 return true;
             }
             return false;

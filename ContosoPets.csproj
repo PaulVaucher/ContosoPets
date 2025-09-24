@@ -9,12 +9,14 @@
 
 	<ItemGroup>
 		<Compile Remove="ContosoPets.UnitTests\**" />
+		<Compile Remove="Infrastructure\AssemblyReferences\**" />
 		<EmbeddedResource Remove="ContosoPets.UnitTests\**" />
+		<EmbeddedResource Remove="Infrastructure\AssemblyReferences\**" />
 		<None Remove="ContosoPets.UnitTests\**" />
+		<None Remove="Infrastructure\AssemblyReferences\**" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="Infrastructure\AssemblyReferences\" />
 		<Folder Include="Scripts\build\" />
 	</ItemGroup>
 

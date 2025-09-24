@@ -4,6 +4,7 @@ using ContosoPets.Domain.Entities;
 using ContosoPets.Application.Services;
 using ContosoPets.Domain.Services;
 using ContosoPets.Domain.ValueObjects;
+using ContosoPets.UnitTests.TestInfrastructure.Fakes;
 using FluentAssertions;
 using Moq;
 using Xunit;
@@ -38,7 +39,6 @@ namespace ContosoPets.UnitTests.Application.Services
             result.Should().BeTrue();
             animal.Age.Should().Be("5 years");
             _mockRepository.Verify(r => r.UpdateAnimal(animal), Times.Once);
-            _mockRepository.Verify(r => r.SaveChanges(), Times.Once);
         }
 
         [Fact]
@@ -55,7 +55,6 @@ namespace ContosoPets.UnitTests.Application.Services
             result.Should().BeTrue();
             animal.Age.Should().Be("?"); // Default value for empty age
             _mockRepository.Verify(r => r.UpdateAnimal(animal), Times.Once);
-            _mockRepository.Verify(r => r.SaveChanges(), Times.Once);
         }
 
         [Fact]
@@ -63,15 +62,15 @@ namespace ContosoPets.UnitTests.Application.Services
         {
             // Arrange
             var dog = new Dog("dog", "d1", "?", "tbd", "Friendly", "Rex");
-            var cat = new Cat("cat", "c1", "?", "tbd", "Independent", "Whiskers");
+            var cat = new Cat("cat", "c2", "?", "tbd", "Independent", "Whiskers");
 
             _mockRepository.Setup(r => r.GetById("d1")).Returns(dog);
-            _mockRepository.Setup(r => r.GetById("c1")).Returns(cat);
+            _mockRepository.Setup(r => r.GetById("c2")).Returns(cat);
 
             var corrections = new Dictionary<AnimalId, (string Age, string PhysicalDescription)>
             {
                 [new AnimalId("d1")] = ("3 years", "Golden fur"),
-                [new AnimalId("c1")] = ("2 years", "Silky black")
+                [new AnimalId("c2")] = ("2 years", "Silky black")
             };
 
             // Act
@@ -84,7 +83,6 @@ namespace ContosoPets.UnitTests.Application.Services
             cat.PhysicalDescription.Should().Be("Silky black");
             _mockRepository.Verify(r => r.UpdateAnimal(dog), Times.Once);
             _mockRepository.Verify(r => r.UpdateAnimal(cat), Times.Once);
-            _mockRepository.Verify(r => r.SaveChanges(), Times.Once);
         }
 
         [Fact]
@@ -106,7 +104,6 @@ namespace ContosoPets.UnitTests.Application.Services
             dog.Age.Should().Be("3 years");
             dog.PhysicalDescription.Should().Be("Golden fur"); // Should remain unchanged
             _mockRepository.Verify(r => r.UpdateAnimal(dog), Times.Once);
-            _mockRepository.Verify(r => r.SaveChanges(), Times.Once);
         }
 
         [Fact]
@@ -128,7 +125,6 @@ namespace ContosoPets.UnitTests.Application.Services
             dog.Age.Should().Be("2 years"); // Should remain unchanged
             dog.PhysicalDescription.Should().Be("Beautiful golden fur");
             _mockRepository.Verify(r => r.UpdateAnimal(dog), Times.Once);
-            _mockRepository.Verify(r => r.SaveChanges(), Times.Once);
         }
 
         [Fact]
@@ -164,7 +160,6 @@ namespace ContosoPets.UnitTests.Application.Services
             result.Should().BeTrue();
             animal.PersonalityDescription.Should().Be("New friendly personality");
             _mockRepository.Verify(r => r.UpdateAnimal(animal), Times.Once);
-            _mockRepository.Verify(r => r.SaveChanges(), Times.Once);
         }
 
         [Fact]
@@ -181,7 +176,6 @@ namespace ContosoPets.UnitTests.Application.Services
             result.Should().BeTrue();
             animal.PersonalityDescription.Should().Be("tbd"); // Default value for empty personality
             _mockRepository.Verify(r => r.UpdateAnimal(animal), Times.Once);
-            _mockRepository.Verify(r => r.SaveChanges(), Times.Once);
         }
 
         [Fact]
@@ -189,15 +183,15 @@ namespace ContosoPets.UnitTests.Application.Services
         {
             // Arrange
             var dog = new Dog("dog", "d1", "2 years", "Golden fur", "tbd", "tbd");
-            var cat = new Cat("cat", "c1", "3 years", "Black fur", "tbd", "tbd");
+            var cat = new Cat("cat", "c2", "3 years", "Black fur", "tbd", "tbd");
 
             _mockRepository.Setup(r => r.GetById("d1")).Returns(dog);
-            _mockRepository.Setup(r => r.GetById("c1")).Returns(cat);
+            _mockRepository.Setup(r => r.GetById("c2")).Returns(cat);
 
             var corrections = new Dictionary<AnimalId, (string Nickname, string Personality)>
             {
                 [new AnimalId("d1")] = ("Rex", "Friendly and playful"),
-                [new AnimalId("c1")] = ("Whiskers", "Independent and curious")
+                [new AnimalId("c2")] = ("Whiskers", "Independent and curious")
             };
 
             // Act
@@ -211,7 +205,6 @@ namespace ContosoPets.UnitTests.Application.Services
 
             _mockRepository.Verify(r => r.UpdateAnimal(dog), Times.Once);
             _mockRepository.Verify(r => r.UpdateAnimal(cat), Times.Once);
-            _mockRepository.Verify(r => r.SaveChanges(), Times.Once);
         }
 
         [Fact]
@@ -233,7 +226,6 @@ namespace ContosoPets.UnitTests.Application.Services
             dog.Nickname.Should().Be("Rex");
             dog.PersonalityDescription.Should().Be("Friendly"); // Should remain unchanged
             _mockRepository.Verify(r => r.UpdateAnimal(dog), Times.Once);
-            _mockRepository.Verify(r => r.SaveChanges(), Times.Once);
         }
 
         [Fact]
@@ -255,7 +247,6 @@ namespace ContosoPets.UnitTests.Application.Services
             dog.Nickname.Should().Be("Rex"); // Should remain unchanged
             dog.PersonalityDescription.Should().Be("Very friendly and energetic");
             _mockRepository.Verify(r => r.UpdateAnimal(dog), Times.Once);
-            _mockRepository.Verify(r => r.SaveChanges(), Times.Once);
         }
 
         [Fact]
@@ -290,7 +281,6 @@ namespace ContosoPets.UnitTests.Application.Services
                 .WithMessage(AppConstants.NoCorrectionsProvidedMessage);
 
             _mockRepository.Verify(r => r.UpdateAnimal(It.IsAny<Animal>()), Times.Never);
-            _mockRepository.Verify(r => r.SaveChanges(), Times.Never);
         }
 
         [Fact]
@@ -336,6 +326,110 @@ namespace ContosoPets.UnitTests.Application.Services
             result!.Species.Should().Be("cat");
             result.Id.Value.Should().Be("c3");
             _mockRepository.Verify(r => r.GetById("c3"), Times.Once);
+        }
+
+        [Fact]
+        public void UpdateAnimalAge_WithExistingId_ShouldReturnTrueAndUpdate_WithFakes()
+        {
+            // Arrange
+            var fakeRepository = new FakeAnimalRepository();
+            var fakeDomainService = new FakeAnimalDomainService();
+            var service = new AnimalApplicationService(fakeRepository, fakeDomainService);
+
+            var animal = new Dog("dog", "d1", "?", "Golden fur", "Friendly", "Rex");
+            fakeRepository.AddAnimal(animal);
+
+            // Act
+            var result = service.UpdateAnimalAge("d1", "5 years");
+
+            // Assert
+            result.Should().BeTrue();
+            animal.Age.Should().Be("5 years");
+            var storedAnimal = fakeRepository.GetById("d1");
+            storedAnimal.Should().NotBeNull();
+            storedAnimal!.Age.Should().Be("5 years");
+        }
+
+        [Fact]
+        public void UpdateAnimalAge_WithEmptyValue_ShouldSetToDefault_WithFakes()
+        {
+            //Arrange
+            var fakeRepository = new FakeAnimalRepository();
+            var fakeDomainService = new FakeAnimalDomainService();
+            var service = new AnimalApplicationService(fakeRepository, fakeDomainService);
+
+            var animal = new Dog("dog", "d1", "2 years", "Golden fur", "Friendly", "Rex");
+            fakeRepository.SeedWith(animal);
+
+            //Act
+            var result = service.UpdateAnimalAge("d1", "");
+
+            //Assert
+            result.Should().BeTrue();
+            var updatedAnimal = fakeRepository.GetById("d1");
+            updatedAnimal!.Age.Should().Be("?");
+        }
+
+        [Fact]
+        public void CompleteAgesAndDescriptions_ShouldUpdateOnlySpecifiedFields_WithFakes()
+        {
+            //Arrange
+            var fakeRepository = new FakeAnimalRepository();
+            var fakeDomainService = new FakeAnimalDomainService();
+            var service = new AnimalApplicationService(fakeRepository, fakeDomainService);
+
+            var dog = new Dog("dog", "d1", "?", "tbd", "Friendly", "Rex");
+            var cat = new Cat("cat", "c2", "?", "tbd", "Independent", "Whiskers");
+            fakeRepository.SeedWith(dog, cat);
+
+            var corrections = new Dictionary<AnimalId, (string Age, string PhysicalDescription)>()
+            {
+                [new AnimalId("d1")] = ("2 years", "Golden fur"),
+                [new AnimalId("c2")] = ("3 years", "Silky black")
+            };
+
+            //Act
+            service.CompleteAgesAndDescriptions(corrections);
+
+            //Assert
+            var updatedDog = fakeRepository.GetById("d1");
+            var updatedCat = fakeRepository.GetById("c2");
+
+            updatedDog!.Age.Should().Be("2 years");
+            updatedDog.PhysicalDescription.Should().Be("Golden fur");
+            updatedCat!.Age.Should().Be("3 years");
+            updatedCat.PhysicalDescription.Should().Be("Silky black");
+        }
+
+        [Fact]
+        public void CompleteNicknamesAndPersonality_WithValidCorrections_ShouldUpdateAnimals_WithFakes()
+        {
+            //Arrange
+            var fakeRepository = new FakeAnimalRepository();
+            var fakeDomainService = new FakeAnimalDomainService();
+            var service = new AnimalApplicationService(fakeRepository, fakeDomainService);
+
+            var dog = new Dog("dog", "d1", "2 years", "Golden fur", "tbd", "tbd");
+            var cat = new Cat("cat", "c2", "3 years", "Black fur", "tbd", "tbd");
+            fakeRepository.SeedWith(dog, cat);
+
+            var corrections = new Dictionary<AnimalId, (string Nickname, string Personality)>
+            {
+                [new AnimalId("d1")] = ("Rex", "Friendly"),
+                [new AnimalId("c2")] = ("Whiskers", "Independent")
+            };
+            
+            //Act
+            service.CompleteNicknamesAndPersonality(corrections);
+
+            //Assert
+            var updatedDog = fakeRepository.GetById("d1");
+            var updatedCat = fakeRepository.GetById("c2");
+
+            updatedDog!.Nickname.Should().Be("Rex");
+            updatedDog.PersonalityDescription.Should().Be("Friendly");
+            updatedCat!.Nickname.Should().Be("Whiskers");
+            updatedCat.PersonalityDescription.Should().Be("Independent");
         }
     }
 }
