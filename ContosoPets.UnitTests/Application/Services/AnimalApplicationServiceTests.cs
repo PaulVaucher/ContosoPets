@@ -6,6 +6,7 @@ using ContosoPets.Domain.Entities;
 using ContosoPets.Domain.Services;
 using ContosoPets.UnitTests.TestInfrastructure.Fakes;
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -13,15 +14,17 @@ namespace ContosoPets.UnitTests.Application.Services
 {
     public class AnimalApplicationServiceTests
     {
+        private readonly Mock<ILogger<AnimalApplicationService>> _mockLogger;
         private readonly Mock<IAnimalRepository> _mockRepository;
         private readonly Mock<IAnimalDomainService> _mockDomainService;
         private readonly AnimalApplicationService _animalService;
 
         public AnimalApplicationServiceTests()
         {
+            _mockLogger = new Mock<ILogger<AnimalApplicationService>>();
             _mockRepository = new Mock<IAnimalRepository>();
             _mockDomainService = new Mock<IAnimalDomainService>();
-            _animalService = new AnimalApplicationService(_mockRepository.Object, _mockDomainService.Object);
+            _animalService = new AnimalApplicationService(_mockLogger.Object, _mockRepository.Object, _mockDomainService.Object);
         }
 
         [Fact]
@@ -135,9 +138,10 @@ namespace ContosoPets.UnitTests.Application.Services
         public void AddNewAnimal_WhenPetLimitReached_ShouldReturnFailure_WithFakes()
         {
             //Arrange
+            var fakeLogger = new Mock<ILogger<AnimalApplicationService>>();
             var fakeRepository = new FakeAnimalRepository();
             var fakeDomainService = new FakeAnimalDomainService();
-            var service = new AnimalApplicationService(fakeRepository, fakeDomainService);
+            var service = new AnimalApplicationService(fakeLogger.Object, fakeRepository, fakeDomainService);
 
             for (int i = 1; i <= AppConstants.MaxPets; i++)
             {
@@ -168,9 +172,10 @@ namespace ContosoPets.UnitTests.Application.Services
         public void AddNewAnimal_WithValidRequest_ShouldReturnSuccess_WithFakes()
         {
             //Arrange
+            var fakeLogger = new Mock<ILogger<AnimalApplicationService>>();
             var fakeRepository = new FakeAnimalRepository();
             var fakeDomainService = new FakeAnimalDomainService();
-            var service = new AnimalApplicationService(fakeRepository, fakeDomainService);
+            var service = new AnimalApplicationService(fakeLogger.Object, fakeRepository, fakeDomainService);
 
             var request = new AddAnimalRequest()
             {
@@ -205,9 +210,10 @@ namespace ContosoPets.UnitTests.Application.Services
         public void AddNewAnimal_WhitInvalidSpecies_ShouldReturnFailure_WithFakes(string invalidSpecies)
         {
             // Arrange
+            var fakeLogger = new Mock<ILogger<AnimalApplicationService>>();
             var fakeRepository = new FakeAnimalRepository();
             var fakeDomainService = new FakeAnimalDomainService();
-            var service = new AnimalApplicationService(fakeRepository, fakeDomainService);
+            var service = new AnimalApplicationService(fakeLogger.Object, fakeRepository, fakeDomainService);
 
             var request = new AddAnimalRequest
             {
@@ -232,10 +238,10 @@ namespace ContosoPets.UnitTests.Application.Services
         public void ListAll_WithMultipleAnimals_ShouldReturnAllAnimals_WithFakes()
         {
             //Arrange
-            // Arrange
+            var fakeLogger = new Mock<ILogger<AnimalApplicationService>>();
             var fakeRepository = new FakeAnimalRepository();
             var fakeDomainService = new FakeAnimalDomainService();
-            var service = new AnimalApplicationService(fakeRepository, fakeDomainService);
+            var service = new AnimalApplicationService(fakeLogger.Object, fakeRepository, fakeDomainService);
 
             var dog = new Dog("dog", "d1", "2 years", "Golden", "Friendly", "Rex");
             var cat = new Cat("cat", "c2", "3 years", "Black", "Independent", "Whiskers");

@@ -1,11 +1,12 @@
 ﻿using ContosoPets.Application.Ports;
+using ContosoPets.Application.Services;
 using ContosoPets.Domain.Constants;
 using ContosoPets.Domain.Entities;
-using ContosoPets.Application.Services;
 using ContosoPets.Domain.Services;
 using ContosoPets.Domain.ValueObjects;
 using ContosoPets.UnitTests.TestInfrastructure.Fakes;
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -13,15 +14,17 @@ namespace ContosoPets.UnitTests.Application.Services
 {
     public class AnimalApplicationServiceUpdateTests
     {
+        private readonly Mock<ILogger<AnimalApplicationService>> _mockLogger;
         private readonly Mock<IAnimalRepository> _mockRepository;
         private readonly Mock<IAnimalDomainService> _mockDomainService;
         private readonly AnimalApplicationService _animalService;
 
         public AnimalApplicationServiceUpdateTests()
         {
+            _mockLogger = new Mock<ILogger<AnimalApplicationService>>();
             _mockRepository = new Mock<IAnimalRepository>();
             _mockDomainService = new Mock<IAnimalDomainService>();
-            _animalService = new AnimalApplicationService(_mockRepository.Object, _mockDomainService.Object);
+            _animalService = new AnimalApplicationService(_mockLogger.Object, _mockRepository.Object, _mockDomainService.Object);
         }
 
         [Fact]
@@ -332,9 +335,10 @@ namespace ContosoPets.UnitTests.Application.Services
         public void UpdateAnimalAge_WithExistingId_ShouldReturnTrueAndUpdate_WithFakes()
         {
             // Arrange
+            var fakeLogger = new Mock<ILogger<AnimalApplicationService>>();
             var fakeRepository = new FakeAnimalRepository();
             var fakeDomainService = new FakeAnimalDomainService();
-            var service = new AnimalApplicationService(fakeRepository, fakeDomainService);
+            var service = new AnimalApplicationService(fakeLogger.Object, fakeRepository, fakeDomainService);
 
             var animal = new Dog("dog", "d1", "?", "Golden fur", "Friendly", "Rex");
             fakeRepository.AddAnimal(animal);
@@ -354,9 +358,10 @@ namespace ContosoPets.UnitTests.Application.Services
         public void UpdateAnimalAge_WithEmptyValue_ShouldSetToDefault_WithFakes()
         {
             //Arrange
+            var fakeLogger = new Mock<ILogger<AnimalApplicationService>>();
             var fakeRepository = new FakeAnimalRepository();
             var fakeDomainService = new FakeAnimalDomainService();
-            var service = new AnimalApplicationService(fakeRepository, fakeDomainService);
+            var service = new AnimalApplicationService(fakeLogger.Object, fakeRepository, fakeDomainService);
 
             var animal = new Dog("dog", "d1", "2 years", "Golden fur", "Friendly", "Rex");
             fakeRepository.SeedWith(animal);
@@ -374,9 +379,10 @@ namespace ContosoPets.UnitTests.Application.Services
         public void CompleteAgesAndDescriptions_ShouldUpdateOnlySpecifiedFields_WithFakes()
         {
             //Arrange
+            var fakeLogger = new Mock<ILogger<AnimalApplicationService>>();
             var fakeRepository = new FakeAnimalRepository();
             var fakeDomainService = new FakeAnimalDomainService();
-            var service = new AnimalApplicationService(fakeRepository, fakeDomainService);
+            var service = new AnimalApplicationService(fakeLogger.Object, fakeRepository, fakeDomainService);
 
             var dog = new Dog("dog", "d1", "?", "tbd", "Friendly", "Rex");
             var cat = new Cat("cat", "c2", "?", "tbd", "Independent", "Whiskers");
@@ -405,9 +411,10 @@ namespace ContosoPets.UnitTests.Application.Services
         public void CompleteNicknamesAndPersonality_WithValidCorrections_ShouldUpdateAnimals_WithFakes()
         {
             //Arrange
+            var fakeLogger = new Mock<ILogger<AnimalApplicationService>>();
             var fakeRepository = new FakeAnimalRepository();
             var fakeDomainService = new FakeAnimalDomainService();
-            var service = new AnimalApplicationService(fakeRepository, fakeDomainService);
+            var service = new AnimalApplicationService(fakeLogger.Object, fakeRepository, fakeDomainService);
 
             var dog = new Dog("dog", "d1", "2 years", "Golden fur", "tbd", "tbd");
             var cat = new Cat("cat", "c2", "3 years", "Black fur", "tbd", "tbd");
@@ -418,7 +425,7 @@ namespace ContosoPets.UnitTests.Application.Services
                 [new AnimalId("d1")] = ("Rex", "Friendly"),
                 [new AnimalId("c2")] = ("Whiskers", "Independent")
             };
-            
+
             //Act
             service.CompleteNicknamesAndPersonality(corrections);
 

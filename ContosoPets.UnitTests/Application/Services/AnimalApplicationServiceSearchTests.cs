@@ -4,6 +4,7 @@ using ContosoPets.Domain.Entities;
 using ContosoPets.Domain.Services;
 using ContosoPets.UnitTests.TestInfrastructure.Fakes;
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -11,15 +12,17 @@ namespace ContosoPets.UnitTests.Application.Services
 {
     public class AnimalApplicationServiceSearchTests
     {
+        private readonly Mock<ILogger<AnimalApplicationService>> _mockLogger;
         private readonly Mock<IAnimalRepository> _mockRepository;
         private readonly Mock<IAnimalDomainService> _mockDomainService;
         private readonly AnimalApplicationService _animalService;
 
         public AnimalApplicationServiceSearchTests()
         {
+            _mockLogger = new Mock<ILogger<AnimalApplicationService>>();
             _mockRepository = new Mock<IAnimalRepository>();
             _mockDomainService = new Mock<IAnimalDomainService>();
-            _animalService = new AnimalApplicationService(_mockRepository.Object, _mockDomainService.Object);
+            _animalService = new AnimalApplicationService(_mockLogger.Object, _mockRepository.Object, _mockDomainService.Object);
         }
 
         [Fact]
@@ -112,7 +115,7 @@ namespace ContosoPets.UnitTests.Application.Services
             }
             else if (species.Equals("cat", StringComparison.OrdinalIgnoreCase) && characteristic.Equals("black", StringComparison.OrdinalIgnoreCase))
             {
-                filteredResults.Add(new Cat("cat", "c2", "1 year", "Tabby with black stripes", "Curious and independent", "Whiskers"));                
+                filteredResults.Add(new Cat("cat", "c2", "1 year", "Tabby with black stripes", "Curious and independent", "Whiskers"));
             }
             _mockRepository.Setup(r => r.GetAnimalsWithCharacteristic(species, characteristic))
                 .Returns(filteredResults);
@@ -128,10 +131,10 @@ namespace ContosoPets.UnitTests.Application.Services
         public void GetAnimalsWithIncompleteAgeOrDescription_ShouldReturnFilteredResults_WithFakes()
         {
             //Arrange
-            // Arrange
+            var fakeLogger = new Mock<ILogger<AnimalApplicationService>>();
             var fakeRepository = new FakeAnimalRepository();
             var fakeDomainService = new FakeAnimalDomainService();
-            var service = new AnimalApplicationService(fakeRepository, fakeDomainService);
+            var service = new AnimalApplicationService(fakeLogger.Object, fakeRepository, fakeDomainService);
 
             fakeRepository.SeedWith(
                 new Dog("dog", "d1", "?", "Golden fur", "Friendly", "Rex"), // Incomplete age
@@ -155,9 +158,10 @@ namespace ContosoPets.UnitTests.Application.Services
         public void GetAnimalsWithIncompleteNicknameOrPersonality_ShouldReturnFilteredResults_WithFakes()
         {
             // Arrange
+            var fakeLogger = new Mock<ILogger<AnimalApplicationService>>();
             var fakeRepository = new FakeAnimalRepository();
             var fakeDomainService = new FakeAnimalDomainService();
-            var service = new AnimalApplicationService(fakeRepository, fakeDomainService);
+            var service = new AnimalApplicationService(fakeLogger.Object, fakeRepository, fakeDomainService);
 
             fakeRepository.SeedWith(
                 new Dog("dog", "d1", "2 years", "Golden fur", "tbd", "Rex"), // Incomplete personality
@@ -181,9 +185,10 @@ namespace ContosoPets.UnitTests.Application.Services
         public void GetAnimalsWithCharacteristic_ShouldFilterCorrectly_WithFakes()
         {
             // Arrange
+            var fakeLogger = new Mock<ILogger<AnimalApplicationService>>();
             var fakeRepository = new FakeAnimalRepository();
             var fakeDomainService = new FakeAnimalDomainService();
-            var service = new AnimalApplicationService(fakeRepository, fakeDomainService);
+            var service = new AnimalApplicationService(fakeLogger.Object, fakeRepository, fakeDomainService);
 
             fakeRepository.SeedWith(
                 new Dog("dog", "d1", "2 years", "Golden fur", "Friendly and energetic", "Rex"),

@@ -1,6 +1,6 @@
-﻿using ContosoPets.Domain.Entities;
+﻿using ContosoPets.Domain.Constants;
+using ContosoPets.Domain.Entities;
 using ContosoPets.Domain.Services;
-using ContosoPets.Domain.Constants;
 
 namespace ContosoPets.UnitTests.TestInfrastructure.Fakes
 {
@@ -36,6 +36,6 @@ namespace ContosoPets.UnitTests.TestInfrastructure.Fakes
             };
         }
 
-        public bool IsSupportedSpecies(string species) => species?.ToLower() is "dog" or "cat";        
+        public bool IsSupportedSpecies(string species) => species?.ToLower() is "dog" or "cat";
     }
 }

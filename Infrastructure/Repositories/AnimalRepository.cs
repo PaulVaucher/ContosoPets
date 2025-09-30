@@ -141,7 +141,7 @@ namespace ContosoPets.Infrastructure.Repositories
                 throw;
             }
         }
-        
+
         public List<Animal> GetAnimalsWithIncompleteAgeOrDescription()
         {
             using var session = _sessionFactory.OpenSession();
@@ -181,7 +181,7 @@ namespace ContosoPets.Infrastructure.Repositories
                 .ToList();
 
             return nhAnimals.Select(ToDomain).ToList();
-        }        
+        }
     }
 }
 

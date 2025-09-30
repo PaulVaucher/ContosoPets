@@ -1,7 +1,7 @@
 ﻿using ContosoPets.Domain.Entities;
 
 namespace ContosoPets.Domain.Services
-{    
+{
     public interface IAnimalDomainService
     {
         string? ValidateNewAnimal(string species, int petCount);

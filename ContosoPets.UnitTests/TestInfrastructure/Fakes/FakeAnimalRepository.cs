@@ -13,7 +13,7 @@ namespace ContosoPets.UnitTests.TestInfrastructure.Fakes
 
         public void AddAnimal(Animal animal)
         {
-            if (_animals.Any(a => a.Id.Value == animal.Id. Value))
+            if (_animals.Any(a => a.Id.Value == animal.Id.Value))
             {
                 throw new InvalidOperationException($"Animal with ID {animal.Id.Value} already exists.");
             }

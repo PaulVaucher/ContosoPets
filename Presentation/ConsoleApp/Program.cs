@@ -6,16 +6,23 @@ using ContosoPets.Infrastructure.DI;
 using ContosoPets.Presentation.ConsoleApp.Commands;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System.Reflection;
 
 namespace ContosoPets.Presentation.ConsoleApp
 {
     static class Program
     {
+        private static ILogger<object>? _logger;
         private static async Task InitializeDatabaseAsync(IServiceProvider serviceProvider)
         {
+            var logger = serviceProvider.GetRequiredService<ILogger<object>>();
+            logger.LogDebug(LoggingConstants.DatabaseInitializationStarted);
+
             var initializer = serviceProvider.GetRequiredService<DatabaseInitializer>();
             await initializer.InitializeDatabaseAsync();
+
+            logger.LogInformation(LoggingConstants.DatabaseInitializationCompleted);
         }
 
         static async Task Main(string[] args)
@@ -25,12 +32,18 @@ namespace ContosoPets.Presentation.ConsoleApp
                 var serviceProvider = ConfigureServices();
                 using (serviceProvider)
                 {
+                    _logger = serviceProvider.GetRequiredService<ILogger<object>>();
+                    _logger.LogInformation(LoggingConstants.ApplicationStarting);
+
                     await InitializeDatabaseAsync(serviceProvider);
                     RunApplication(serviceProvider);
+
+                    _logger.LogInformation(LoggingConstants.ApplicationShuttingDown);
                 }
             }
             catch (Exception ex)
             {
+                // Keep Console.WriteLine for critical startup errors since logs might not be available
                 Console.WriteLine(string.Format(AppConstants.ApplicationStartupErrorFormat, ex.Message));
                 Console.WriteLine(AppConstants.ApplicationExitingMessage);
                 Environment.ExitCode = 1;
@@ -88,7 +101,7 @@ namespace ContosoPets.Presentation.ConsoleApp
                        .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable(ProgramConstants.EnvironmentVariable) ?? ProgramConstants.DevelopmentEnvironment}.json", optional: true, reloadOnChange: true);
             }
             else
-            {                
+            {
                 Console.WriteLine(ProgramConstants.ConfigurationFilesNotFoundMessage);
                 builder.AddInMemoryCollection(new Dictionary<string, string?>
                 {
@@ -103,24 +116,12 @@ namespace ContosoPets.Presentation.ConsoleApp
         }
 
         private static void RunApplication(ServiceProvider serviceProvider)
-        {
-            try
-            {
+        {            
                 var animalService = serviceProvider.GetRequiredService<IAnimalApplicationService>();
                 var output = serviceProvider.GetRequiredService<ILinePrinter>();
 
-                RunInteractiveMenu(animalService, output);
-            }
-            catch (InvalidOperationException ex)
-            {
-                Console.WriteLine(string.Format(AppConstants.ServiceConfigurationErrorFormat, ex.Message));
-                throw;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(string.Format(AppConstants.UnexpectedErrorFormat, ex.Message));
-                throw;
-            }
+                _logger?.LogInformation(LoggingConstants.ApplicationStarted);
+                RunInteractiveMenu(animalService, output);            
         }
 
         private static void RunInteractiveMenu(IAnimalApplicationService service, ILinePrinter output)
@@ -141,6 +142,7 @@ namespace ContosoPets.Presentation.ConsoleApp
                 }
                 catch (Exception ex)
                 {
+                    _logger?.LogError(ex, LoggingConstants.UnexpectedError, nameof(Program), nameof(RunInteractiveMenu));
                     output.PrintLine(string.Format(AppConstants.MenuExecutionErrorFormat, ex.Message));
                     output.PrintLine(AppConstants.ContinuePrompt);
                     output.ReadKey();
@@ -163,11 +165,15 @@ namespace ContosoPets.Presentation.ConsoleApp
         {
             var input = output.ReadLine();
 
+            _logger?.LogDebug(LoggingConstants.UserInputReceived, LoggingConstants.InputTypeMenuSelection, input ?? LoggingConstants.InputValueNull);
+
             if (int.TryParse(input, out int menuChoice) &&
                 Enum.IsDefined(typeof(MenuOptionEnum), menuChoice))
             {
                 var selected = (MenuOptionEnum)menuChoice;
                 output.PrintLine();
+
+                _logger?.LogInformation(LoggingConstants.UserMenuSelection, selected);
 
                 if (commandMap.TryGetValue(selected, out var command))
                 {
@@ -180,6 +186,7 @@ namespace ContosoPets.Presentation.ConsoleApp
             }
             else
             {
+                _logger?.LogWarning(LoggingConstants.InvalidUserInput, LoggingConstants.InputTypeMenuSelection, input ?? LoggingConstants.InputValueNull);
                 output.PrintLine(AppConstants.InvalidOptionMessage);
             }
         }
@@ -188,10 +195,16 @@ namespace ContosoPets.Presentation.ConsoleApp
         {
             try
             {
+                using var scope = _logger?.BeginScope("Command={CommandType}", command.GetType().Name);
+                _logger?.LogDebug(LoggingConstants.ExecutingCommand, command.GetType().Name);
+
                 command.Execute();
+
+                _logger?.LogDebug(LoggingConstants.CommandExecutedSuccessfully, command.GetType().Name);
             }
             catch (Exception ex)
             {
+                _logger?.LogError(ex, LoggingConstants.CommandExecutionFailed, command.GetType().Name);
                 output.PrintLine(string.Format(AppConstants.MenuExecutionErrorFormat, ex.Message));
                 output.PrintLine(AppConstants.ContinuePrompt);
                 output.ReadKey();

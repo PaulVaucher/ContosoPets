@@ -3,7 +3,7 @@ using ContosoPets.Domain.Constants;
 using ContosoPets.Domain.Entities;
 
 namespace ContosoPets.Domain.Services
-{    
+{
     public class AnimalDomainService : IAnimalDomainService
     {
         private static readonly HashSet<string> SupportedSpecies = new(StringComparer.OrdinalIgnoreCase)

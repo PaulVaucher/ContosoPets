@@ -1,6 +1,6 @@
-﻿using ContosoPets.Application.Services;
+﻿using ContosoPets.Application.Ports;
+using ContosoPets.Application.Services;
 using ContosoPets.Application.UseCases.Animals;
-using ContosoPets.Application.Ports;
 using ContosoPets.Domain.Constants;
 using ContosoPets.Domain.Entities;
 
