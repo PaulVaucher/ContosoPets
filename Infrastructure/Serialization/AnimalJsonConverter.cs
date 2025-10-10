@@ -11,51 +11,40 @@ namespace ContosoPets.Infrastructure.Serialization
             using JsonDocument doc = JsonDocument.ParseValue(ref reader);
             var root = doc.RootElement;
 
-                // Read the Species property to determine the type
-                if (root.TryGetProperty("Species", out var speciesProperty))
+            try
+            {
+                // Lire toutes les propriétés manuellement
+                string species = root.GetProperty("Species").GetString()?.ToLower() ?? "";
+                string id = root.GetProperty("Id").GetString() ?? "";
+                string age = root.GetProperty("Age").GetString() ?? "?";
+                string physicalDescription = root.GetProperty("PhysicalDescription").GetString() ?? "tbd";
+                string personalityDescription = root.GetProperty("PersonalityDescription").GetString() ?? "tbd";
+                string nickname = root.GetProperty("Nickname").GetString() ?? "tbd";
+
+                // Créer directement avec les constructeurs (paramètres en minuscules)
+                return species switch
                 {
-                    string species = speciesProperty.GetString()?.ToLower() ?? "";
-
-                    // Create options without this converter to avoid recursion
-                    var newOptions = new JsonSerializerOptions(options);
-                    newOptions.Converters.Clear();
-                    foreach (var converter in options.Converters)
-                    {
-                        if (converter != this)
-                        {
-                            newOptions.Converters.Add(converter);
-                        }
-                    }
-
-                    // Deserialize to the appropriate type
-                    string json = root.GetRawText();
-                    return species switch
-                    {
-                        "dog" => JsonSerializer.Deserialize<Dog>(json, newOptions),
-                        "cat" => JsonSerializer.Deserialize<Cat>(json, newOptions),
-                        _ => throw new JsonException($"Unknown species: {species}")
-                    };
-                }
-
-                throw new JsonException("Species property not found");
-            
+                    "dog" => new Dog(species, id, age, physicalDescription, personalityDescription, nickname),
+                    "cat" => new Cat(species, id, age, physicalDescription, personalityDescription, nickname),
+                    _ => throw new JsonException($"Unknown species: {species}")
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new JsonException($"Error deserializing Animal: {ex.Message}", ex);
+            }
         }
 
         public override void Write(Utf8JsonWriter writer, Animal value, JsonSerializerOptions options)
         {
-            // Create options without this converter to avoid recursion
-            var newOptions = new JsonSerializerOptions(options);
-            newOptions.Converters.Clear();
-            foreach (var converter in options.Converters)
-            {
-                if (converter != this)
-                {
-                    newOptions.Converters.Add(converter);
-                }
-            }
-
-            // Serialize normally
-            JsonSerializer.Serialize(writer, value, value.GetType(), newOptions);
+            writer.WriteStartObject();
+            writer.WriteString("Species", value.Species);
+            writer.WriteString("Id", value.Id.Value); // ✅ Utiliser .Value pour AnimalId
+            writer.WriteString("Age", value.Age);
+            writer.WriteString("PhysicalDescription", value.PhysicalDescription);
+            writer.WriteString("PersonalityDescription", value.PersonalityDescription);
+            writer.WriteString("Nickname", value.Nickname);
+            writer.WriteEndObject();
         }
     }
 }

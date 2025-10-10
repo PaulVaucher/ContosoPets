@@ -49,7 +49,7 @@ namespace ContosoPets.Infrastructure.Repositories
 
         public int GetAnimalCount()
         {
-            return _animals.Count(animal => !string.IsNullOrEmpty(animal.Id));
+            return _animals.Count(animal => !string.IsNullOrEmpty(animal.Id.Value));
         }
 
         public void AddAnimal(Animal animal)
@@ -59,12 +59,12 @@ namespace ContosoPets.Infrastructure.Repositories
 
         public Animal? GetById(string id)
         {
-            return _animals.FirstOrDefault(a => a.Id == id);
+            return _animals.FirstOrDefault(a => a.Id.Value == id);
         }
 
         public void UpdateAnimal(Animal animal)
         {
-            var existingIndex = _animals.FindIndex(a => a.Id == animal.Id);
+            var existingIndex = _animals.FindIndex(a => a.Id.Value == animal.Id.Value);
             if (existingIndex >= 0)
             {
                 _animals[existingIndex] = animal;
@@ -73,13 +73,13 @@ namespace ContosoPets.Infrastructure.Repositories
 
         public void DeleteAnimal(Animal animal)
         {
-            _animals.RemoveAll(a => a.Id == animal.Id);
+            _animals.RemoveAll(a => a.Id.Value == animal.Id.Value);
         }
 
         public List<Animal> GetAnimalsWithIncompleteAgeOrDescription()
         {
             return _animals
-                .Where(a => !string.IsNullOrEmpty(a.Id) &&
+                .Where(a => !string.IsNullOrEmpty(a.Id.Value) &&
                             (string.IsNullOrEmpty(a.Age) || a.Age == AppConstants.UnknownAge ||
                              string.IsNullOrEmpty(a.PhysicalDescription) || a.PhysicalDescription == AppConstants.DefaultValue))
                 .ToList();
@@ -88,7 +88,7 @@ namespace ContosoPets.Infrastructure.Repositories
         public List<Animal> GetAnimalsWithIncompleteNicknameOrPersonality()
         {
             return _animals
-                .Where(a => !string.IsNullOrEmpty(a.Id) &&
+                .Where(a => !string.IsNullOrEmpty(a.Id.Value) &&
                             (string.IsNullOrEmpty(a.Nickname) || a.Nickname == AppConstants.DefaultValue ||
                              string.IsNullOrEmpty(a.PersonalityDescription) || a.PersonalityDescription == AppConstants.DefaultValue))
                 .ToList();
@@ -104,7 +104,7 @@ namespace ContosoPets.Infrastructure.Repositories
 
             return _animals
                 .Where(a => a.Species.ToLower() == lowerSpecies
-                && !string.IsNullOrEmpty(a.Id)
+                && !string.IsNullOrEmpty(a.Id.Value)
                 && (a.PhysicalDescription.ToLower().Contains(lowerCharacteristic) ||
                     a.PersonalityDescription.ToLower().Contains(lowerCharacteristic)))
                 .ToList();
