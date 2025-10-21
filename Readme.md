@@ -173,13 +173,6 @@ Ce projet illustre les concepts suivants :
 - **Pattern Repository** pour l'accès aux données
 - **Pattern Builder** pour la création d'objets complexes
 - **Pattern Command** pour les actions utilisateur
-
-### Patterns Implémentés
-- **Clean Architecture** avec séparation stricte des couches
-- **Repository Pattern** pour l'abstraction des données
-- **Builder Pattern** pour la création d'entités complexes
-- **Command Pattern** pour les actions utilisateur (menu)
-- **Facade Pattern** dans les services applicatifs
 - **Strategy Pattern** pour les différents types d'animaux
 - **CQRS-like** avec Request/Result dans les UseCases
 
@@ -205,7 +198,7 @@ Ce projet illustre les concepts suivants :
 ## 👥 Contributeurs
 
 - **[Paul Vaucher](https://github.com/PaulVaucher)** - Développeur principal
-- **[Matthias Morard]** - Supervision et guidance architecturale
+- **[Matthias Morard](https://www.linkedin.com/in/matthias-morard-7a7a60177/)** - Supervision et guidance architecturale
 
 ## 📄 Licence
 
