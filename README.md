@@ -201,7 +201,6 @@ Ce projet illustre les concepts suivants :
 
 ### Architecture et Design Patterns
 - **Clean Architecture** et séparation des responsabilités
-- **Domain-Driven Design (DDD)** avec services de domaine
 - **Pattern Repository** pour l'abstraction des données
 - **Pattern Builder** pour la création d'objets complexes
 - **Pattern Command** pour les actions utilisateur
@@ -243,7 +242,7 @@ Ce projet illustre les concepts suivants :
 ## 👥 Contributeurs
 
 - **[Paul Vaucher](https://github.com/PaulVaucher)** - Développeur principal
-- **[Matthias Morard]** - Supervision et guidance architecturale
+- **[Matthias Morard](https://www.linkedin.com/in/matthias-morard-7a7a60177/)** - Supervision et guidance architecturale
 
 ## 📄 Licence
 
