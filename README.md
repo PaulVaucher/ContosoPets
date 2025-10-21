@@ -2,7 +2,7 @@
 
 ## 📋 Description
 
-ContosoPets est une application console .NET développée dans le cadre d'un exercice de formation Microsoft Learn en collaboration avec un mentor. Ce projet met en pratique les principes de la **Programmation Orientée Objet (OOP)** et de l'**Architecture Propre (Clean Architecture)**.
+ContosoPets est une application console .NET développée dans le cadre d'un exercice de formation Microsoft Learn en collaboration avec mon mentor Matthias Morard. Ce projet met en pratique les principes de la **Programmation Orientée Objet (OOP)** et de l'**Architecture Propre (Clean Architecture)**.
 
 L'application permet de gérer une base de données d'animaux domestiques (chiens et chats) avec leurs informations détaillées telles que l'âge, la description physique, la personnalité et les surnoms. Les données sont stockées localement dans un fichier JSON pour simplifier l'installation et l'utilisation.
 
